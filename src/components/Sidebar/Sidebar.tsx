@@ -1,23 +1,26 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import logo from "../assets/logo.svg";
-import search from "../assets/search.svg";
-import addFolderIcon from "../assets/folderLogo.svg";
-import folder from "../assets/folder.svg";
-import openFolder from "../assets/openFolder.svg";
-import favorite from "../assets/favorite.svg";
-import trash from "../assets/trash.svg";
-import archive from "../assets/archive.svg";
-import document from "../assets/document.svg";
-import inactivedocument from "../assets/inactivedocument.svg";
-import plus from "../assets/plus.svg";
+import { useNotes } from "../../context/NotesContext";
+import logo from "../../assets/logo.svg";
+import search from "../../assets/search.svg";
+import addFolderIcon from "../../assets/folderLogo.svg";
+import folder from "../../assets/folder.svg";
+import openFolder from "../../assets/openFolder.svg";
+import favorite from "../../assets/favorite.svg";
+import trash from "../../assets/trash.svg";
+import archive from "../../assets/archive.svg";
+import document from "../../assets/document.svg";
+import inactivedocument from "../../assets/inactivedocument.svg";
+import plus from "../../assets/plus.svg";
 import axios from "axios";
 
 function Sidebar() {
+  // const { notes , fetchNotes } = useNotes(); 
   const [searchOpen, setSearchOpen] = useState(false);
   const [folders, setFolders] = useState([]);
+  const [recents, setRecents] = useState([]);
   const [addFolder, setAddFolder] = useState(false);
-  const [newFolderName, setNewFolderName] = useState("");
+  const [newFolderName, setNewFolderName] = useState("New Folder");
 
   function addNewFolder() {
     axios
@@ -29,8 +32,11 @@ function Sidebar() {
   useEffect(() => {
     {
       axios.get("/api/folders").then((res) => setFolders(res.data.folders));
+      axios
+        .get("/api/notes/recent")
+        .then((res) => setRecents(res.data.recentNotes));
     }
-  }, [folders]);
+  }, []);
 
   return (
     <div className="flex">
@@ -65,21 +71,23 @@ function Sidebar() {
           )}
         </div>
         <div className="flex flex-col gap-5 text-[rgba(255,255,255,0.6)]">
-          <ul>
+          <div>
             <p className="text-xs text-gray-400 pl-5 pb-2">Recents</p>
-            <li className="text-white bg-[#e50914] pl-5 pt-3 pb-3 flex gap-4">
-              <img src={document} alt="" />
-              Home
-            </li>
-            <li className="hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4">
-              <img src={inactivedocument} alt="" />
-              Profile
-            </li>
-            <li className="hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4">
-              <img src={inactivedocument} alt="" />
-              Logout
-            </li>
-          </ul>
+            {recents.map((note, index: number) => (
+              <NavLink
+                to={`/folders/${note.folder.id}/notes/${note.id}`}
+                className={({ isActive }) =>
+                  `text-white pl-5 pt-3 pb-3 flex gap-4 ${
+                    isActive ? "bg-[#e50914]" : ""
+                  }`
+                }
+                key={index}
+              >
+                <img src={document} alt="" />
+                {note.title}
+              </NavLink>
+            ))}
+          </div>
           <ul>
             <div className="flex justify-between pr-5">
               <p className="text-xs text-gray-400 pl-5 pb-2">Folders</p>
@@ -103,12 +111,12 @@ function Sidebar() {
                 />
               </li>
             )}
-            <div className="h-50 overflow-auto">
+            <div className="h-60 overflow-auto">
               {folders.map((item: any, index: number) => (
                 <NavLink
                   to={`/folders/${item.id}`}
                   className={({ isActive }) =>
-                    `pl-5 pt-3 pb-3 flex gap-4 ${
+                    `hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4 ${
                       isActive ? "text-white bg-[rgba(255,255,255,0.05)]" : ""
                     }`
                   }
@@ -129,18 +137,18 @@ function Sidebar() {
           </ul>
           <ul>
             <p className="text-xs text-gray-400 pl-5 pb-2">More</p>
-            <li className="hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4">
+            <NavLink to={`/favorites`} className="hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4">
               <img src={favorite} alt="" />
               Favorites
-            </li>
-            <li className="hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4">
+            </NavLink>
+            <NavLink to={`/trash`} className="hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4">
               <img src={trash} alt="" />
               Trash
-            </li>
-            <li className="hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4">
+            </NavLink>
+            <NavLink to={`/archived`} className="hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4">
               <img src={archive} alt="" />
               Archived Notes
-            </li>
+            </NavLink>
           </ul>
         </div>
       </div>
