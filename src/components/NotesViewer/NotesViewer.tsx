@@ -1,7 +1,10 @@
 import option from "../../assets/option.svg";
 import date from "../../assets/date.svg";
 import folder from "../../assets/folder.svg";
-import { useEffect, useState } from "react";
+import archive from "../../assets/archive.svg";
+import trash from "../../assets/trash.svg";
+import favorite from "../../assets/favorite.svg";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
@@ -19,13 +22,30 @@ const formattedDate = `${day}/${month}/${year}`;
 
 function NotesViewer() {
   const [noteData, setNoteData] = useState(def);
-  const { noteId} = useParams();
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const { noteId } = useParams();
+  const menuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if(!noteId)
-      return;
-    axios.get(`/api/notes/${noteId}`)
-    .then(res => setNoteData(res.data.note))
+    if (!noteId) return;
+    axios.get(`/api/notes/${noteId}`).then((res) => setNoteData(res.data.note));
   }, [noteId]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOptionsOpen(false);
+      }
+    };
+
+    if (optionsOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [optionsOpen]);
 
   function handleDataChange(event: any) {
     setNoteData({
@@ -35,14 +55,13 @@ function NotesViewer() {
   }
   function saveNote(event: any) {
     event.preventDefault();
-    axios
-      .post("/api/notes", {
-          folderId: "91803881-6292-4009-a3ab-6989d4ca0beb",
-          title: noteData.title,
-          content: noteData.content,
-          isFavorite: false,
-          isArchived: false,
-      })
+    axios.post("/api/notes", {
+      folderId: "91803881-6292-4009-a3ab-6989d4ca0beb",
+      title: noteData.title,
+      content: noteData.content,
+      isFavorite: false,
+      isArchived: false,
+    });
   }
   return (
     <div className="w-full p-12 ">
@@ -55,8 +74,35 @@ function NotesViewer() {
             value={noteData.title}
             onChange={handleDataChange}
           />
-          <img src={option} alt="" className="w-7 h-7" />
+          <div>
+            <img
+              src={option}
+              alt="menu"
+              className="w-7 h-7"
+              onClick={() => setOptionsOpen(true)}
+            />
+          </div>
         </div>
+        {optionsOpen && (
+          <div
+            ref={menuRef}
+            className="absolute top-24 right-12 bg-[rgba(51,51,51,1)] p-4 flex flex-col gap-4 rounded w-55"
+          >
+            <button className="flex gap-3 hover:opacity-80">
+              <img src={favorite} className="color-white" />
+              Add to favorites
+            </button>
+            <button className="flex gap-3 hover:opacity-80">
+              <img src={archive} />
+              Archived
+            </button>
+            <hr className="text-[rgba(255,255,255,0.2)]" />
+            <button className="flex gap-3 hover:opacity-80">
+              <img src={trash} />
+              Delete
+            </button>
+          </div>
+        )}
         <div className="flex flex-col gap-2">
           <div className="flex items-center w-full">
             <div className="flex items-center gap-5 w-32">
@@ -84,7 +130,7 @@ function NotesViewer() {
             value={noteData.content}
           ></textarea>
         </div>
-        <button type="submit">submit</button>
+        <button type="submit" className="bg-[#e50914] p-3 pl-7 pr-7 rounded hover:bg-red-700">submit</button>
       </form>
     </div>
   );

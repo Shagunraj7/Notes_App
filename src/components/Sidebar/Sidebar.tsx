@@ -15,7 +15,6 @@ import plus from "../../assets/plus.svg";
 import axios from "axios";
 
 function Sidebar() {
-  // const { notes , fetchNotes } = useNotes(); 
   const [searchOpen, setSearchOpen] = useState(false);
   const [folders, setFolders] = useState([]);
   const [recents, setRecents] = useState([]);
@@ -64,7 +63,7 @@ function Sidebar() {
             </div>
           )}
           {!searchOpen && (
-            <button className="bg-[rgba(255,255,255,0.05)] p-3 flex justify-center items-center gap-2">
+            <button className="bg-[rgba(255,255,255,0.05)] p-3 flex justify-center items-center gap-2 cursor-pointer">
               <img src={plus} alt="" />
               New Note
             </button>
@@ -75,17 +74,19 @@ function Sidebar() {
             <p className="text-xs text-gray-400 pl-5 pb-2">Recents</p>
             {recents.map((note, index: number) => (
               <NavLink
-                to={`/folders/${note.folder.id}/notes/${note.id}`}
-                className={({ isActive }) =>
-                  `text-white pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive ? "bg-[#e50914]" : ""
-                  }`
-                }
-                key={index}
-              >
-                <img src={document} alt="" />
-                {note.title}
-              </NavLink>
+              to={`/folders/${note.folder.id}/notes/${note.id}`}
+              className={({ isActive }) =>
+                `text-white pl-5 pt-3 pb-3 flex gap-4 ${isActive ? "bg-[#e50914]" : ""}`
+              }
+              key={index}
+            >
+              {({ isActive }) => (
+                <>
+                  <img src={isActive ? document : inactivedocument} alt="" />
+                  {note.title}
+                </>
+              )}
+            </NavLink>
             ))}
           </div>
           <ul>

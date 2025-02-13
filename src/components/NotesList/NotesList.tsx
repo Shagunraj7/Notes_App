@@ -3,6 +3,7 @@ import { useNotes } from "../../context/NotesContext";
 
 function NotesList() {
   const { notes } = useNotes(); 
+
   function convertDate(fetchedDate: string): string {
     const date = new Date(fetchedDate);
 
@@ -16,7 +17,7 @@ function NotesList() {
   return (
     <>
       <div className="flex flex-col p-4 pt-6 bg-[#1C1C1C] gap-5">
-        <div className="w-81 text-xl semi-bold pb-2">Personal</div>
+        <div className="w-81 text-xl semi-bold pb-2">{notes[0] ? notes[0].folder.name : "Empty Folder"}</div>
         <div className="w-full h-[90vh] overflow-auto flex flex-col gap-4">
           {notes.map((note: any, index: number) => (
             <NavLink
