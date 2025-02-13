@@ -53,6 +53,22 @@ function NotesViewer() {
       [event.target.name]: event.target.value,
     });
   }
+  function handleMenu(option: string) {
+    if(option== "delete") {
+      setOptionsOpen(false);
+      axios.delete(`/api/notes/${noteId}`);
+      return;
+    }
+    let archive = option == "archive" ? true : false;
+    let favorite = option == "favorite" ? true : false;
+    axios.patch(`/api/notes/${noteId}`, {
+        folderId: noteData.folder.id,
+        title: noteData.title,
+        content: noteData.content,
+        isFavorite: favorite,
+        isArchived: archive
+    });
+  }
   function saveNote(event: any) {
     event.preventDefault();
     axios.post("/api/notes", {
@@ -88,16 +104,16 @@ function NotesViewer() {
             ref={menuRef}
             className="absolute top-24 right-12 bg-[rgba(51,51,51,1)] p-4 flex flex-col gap-4 rounded w-55"
           >
-            <button className="flex gap-3 hover:opacity-80">
+            <button className="flex gap-3 hover:opacity-80" onClick={() => handleMenu("favorite")}>
               <img src={favorite} className="color-white" />
               Add to favorites
             </button>
-            <button className="flex gap-3 hover:opacity-80">
+            <button className="flex gap-3 hover:opacity-80" onClick={() => handleMenu("archive")}>
               <img src={archive} />
               Archived
             </button>
             <hr className="text-[rgba(255,255,255,0.2)]" />
-            <button className="flex gap-3 hover:opacity-80">
+            <button className="flex gap-3 hover:opacity-80" onClick={() => handleMenu("delete")}>
               <img src={trash} />
               Delete
             </button>
@@ -123,11 +139,12 @@ function NotesViewer() {
         <div className="pt-5">
           <textarea
             className="w-full focus:outline-none "
-            rows={32}
+            rows={28}
             name="content"
             id="content"
             onChange={handleDataChange}
             value={noteData.content}
+            placeholder="Write your Note"
           ></textarea>
         </div>
         <button type="submit" className="bg-[#e50914] p-3 pl-7 pr-7 rounded hover:bg-red-700">submit</button>

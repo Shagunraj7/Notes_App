@@ -112,7 +112,7 @@ function Sidebar() {
                 />
               </li>
             )}
-            <div className="h-60 overflow-auto">
+            <div className="max-h-90 overflow-auto">
               {folders.map((item: any, index: number) => (
                 <NavLink
                   to={`/folders/${item.id}`}

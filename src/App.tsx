@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
+import InvalidPath from "./pages/InvalidPath"
 import "./index.css";
 import { NotesProvider } from './context/NotesContext'; 
 
@@ -13,6 +14,7 @@ function App() {
         <Route path="trash" element={<Home />} />
         <Route path="archived" element={<Home />} />
         <Route path="favorites" element={<Home />} />
+        <Route path="*" element={<InvalidPath />} />
       </Routes>
     </NotesProvider>
   );
