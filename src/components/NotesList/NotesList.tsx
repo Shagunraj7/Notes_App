@@ -3,7 +3,6 @@ import { useNotes } from "../../context/NotesContext";
 
 function NotesList() {
   const { notes } = useNotes(); 
-
   function convertDate(fetchedDate: string): string {
     const date = new Date(fetchedDate);
 
@@ -21,14 +20,18 @@ function NotesList() {
         <div className="w-full h-[90vh] overflow-auto flex flex-col gap-4">
           {notes.map((note: any, index: number) => (
             <NavLink
-              to={`/folders/${note.folderId}/notes/${note.id}`}
-              key={index}
-              className="bg-[rgba(255,255,255,0.03)] p-5 flex flex-col gap-4"
-            >
+            to={`/folders/${note.folderId}/notes/${note.id}`}
+            key={index}
+            className={({ isActive }) =>
+              `p-5 flex flex-col gap-4 ${
+                isActive ? "bg-[rgba(255,255,255,0.1)]" : "bg-[rgba(255,255,255,0.03)]"
+              }`
+            }
+          >
               <p>{note.title}</p>
               <div className="flex gap-4 text-xs">
                 <p className="opacity-40">{convertDate(note.createdAt)}</p>
-                <p className="opacity-60">{note.preview.slice(0, 35) + "..."}</p>
+                <p className="opacity-60">{note.preview.slice(0, 28) + "..."}</p>
               </div>
             </NavLink>
           ))}

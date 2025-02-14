@@ -72,7 +72,7 @@ function NotesViewer() {
   function saveNote(event: any) {
     event.preventDefault();
     axios.post("/api/notes", {
-      folderId: "91803881-6292-4009-a3ab-6989d4ca0beb",
+      folderId: noteData.folder.id,
       title: noteData.title,
       content: noteData.content,
       isFavorite: false,

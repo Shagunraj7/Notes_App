@@ -3,7 +3,9 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import NotesList from "../components/NotesList/NotesList";
 import NotesViewer from "../components/NotesViewer/NotesViewer";
 import { useNotes } from "../context/NotesContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Restore from "../components/Restore/Restore";
+import axios from "axios";
 
 function Home() {
   const { folderId } = useParams();
@@ -11,12 +13,9 @@ function Home() {
   const { fetchNotes } = useNotes(); 
 
   useEffect(() => {
-    let queryParams = { archived: "false", favorite: "false", deleted: "false", folderId };
-
+    let queryParams = { archived: "false", favorite: "false", folderId };
     if (location.pathname === "/favorites") {
       queryParams.favorite = "true";
-    } else if (location.pathname === "/trash") {
-      queryParams.deleted = "true";
     } else if (location.pathname === "/archived") {
       queryParams.archived = "true";
     }
