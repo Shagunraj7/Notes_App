@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import axios from "axios";
 
+const AxiosApi = axios.create({ baseURL:'https://nowted-server.remotestate.com' });
 const NotesContext = createContext<any>(null);
 
 export function NotesProvider({ children }: { children: React.ReactNode }) {
@@ -9,20 +10,21 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
 
   const fetchNotes = async ({
     folderId = "",
+    page = 1,
     archived = "false",
     favorite = "false",
     deleted = "false",
   }) => {
     setLoading(true);
     try {
-      const response = await axios.get(`/api/notes`, {
+      const response = await AxiosApi.get(`/notes`, {
         params: {
           archived,
           favorite,
           deleted,
           folderId,
-          page: 1,
-          limit: 100,
+          page,
+          limit: 10,
         },
       });
       setNotes(response.data.notes);

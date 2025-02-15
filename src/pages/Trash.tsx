@@ -1,15 +1,15 @@
-import Sidebar from "../components/Sidebar/Sidebar";
 import Restore from "../components/Restore/Restore";
 import { useParams } from "react-router-dom";
-import TrashList from "../components/TrashList/TrashList";
+import NotesSelect from "../components/NotesSelect/NotesSelect";
+import NotesList from "../components/NotesList/NotesList";
 
 function Trash() {
   const { noteId } = useParams();
+
   return (
     <div className="flex">
-      <Sidebar />
-      <TrashList />
-      {noteId && <Restore />}
+      <NotesList />
+      {noteId ? <Restore /> : <NotesSelect/>}
     </div>
   );
 }

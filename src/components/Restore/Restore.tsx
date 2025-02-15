@@ -3,11 +3,13 @@ import { useNavigate , useParams } from "react-router-dom";
 import restore from "../../assets/restore.svg"
 import axios from "axios";
 
+const AxiosApi = axios.create({ baseURL:'https://nowted-server.remotestate.com' });
+
 function Restore() {
   const {noteId} = useParams();
   const navigate = useNavigate();
   function restoreNote() {
-    axios.post(`/api/notes/${noteId}/restore`);
+    AxiosApi.post(`/notes/${noteId}/restore`);
     navigate("/trash");
   }
   return (

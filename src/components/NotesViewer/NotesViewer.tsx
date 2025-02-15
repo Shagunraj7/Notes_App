@@ -1,18 +1,15 @@
-import option from "../../assets/option.svg";
 import date from "../../assets/date.svg";
+import option from "../../assets/option.svg"
 import folder from "../../assets/folder.svg";
 import archive from "../../assets/archive.svg";
 import trash from "../../assets/trash.svg";
 import favorite from "../../assets/favorite.svg";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams , useNavigate} from "react-router-dom";
+import { useFolderContext } from "../../context/FolderContext";
 
-const def = {
-  title: "Shagun's First Note",
-  folder: "myFolder",
-  content: "This is my small Content",
-};
+const AxiosApi = axios.create({ baseURL: "https://nowted-server.remotestate.com",});
 const currentDate = new Date();
 const day = String(currentDate.getDate()).padStart(2, "0");
 const month = String(currentDate.getMonth() + 1).padStart(2, "0");
@@ -21,26 +18,26 @@ const year = currentDate.getFullYear();
 const formattedDate = `${day}/${month}/${year}`;
 
 function NotesViewer() {
-  const [noteData, setNoteData] = useState(def);
+  const [noteData, setNoteData] = useState({});
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const { noteId } = useParams();
+  const { noteId , folderId } = useParams();
+  const { folderName }  = useFolderContext();
+  const navigate = useNavigate();
   const menuRef = useRef<HTMLDivElement>(null);
-
+  
   useEffect(() => {
-    if (!noteId) return;
-    axios.get(`/api/notes/${noteId}`).then((res) => setNoteData(res.data.note));
+    if (!noteId || noteId === "newNote") return;
+    AxiosApi.get(`/notes/${noteId}`).then((res) => setNoteData(res.data.note));
   }, [noteId]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node))
         setOptionsOpen(false);
-      }
     };
 
-    if (optionsOpen) {
+    if (optionsOpen)
       document.addEventListener("mousedown", handleClickOutside);
-    }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -54,30 +51,32 @@ function NotesViewer() {
     });
   }
   function handleMenu(option: string) {
-    if(option== "delete") {
-      setOptionsOpen(false);
-      axios.delete(`/api/notes/${noteId}`);
-      return;
+    if (option == "delete") {
+      AxiosApi.delete(`/notes/${noteId}`);
+      setTimeout(() => navigate(`/trash/${noteId}`), 100);
     }
-    let archive = option == "archive" ? true : false;
-    let favorite = option == "favorite" ? true : false;
-    axios.patch(`/api/notes/${noteId}`, {
-        folderId: noteData.folder.id,
-        title: noteData.title,
-        content: noteData.content,
-        isFavorite: favorite,
-        isArchived: archive
+    AxiosApi.patch(`/notes/${noteId}`, {
+      folderId,
+      title: noteData.title,
+      content: noteData.content,
+      isFavorite: option === "favorite",
+      isArchived: option == "archive" ,
     });
   }
   function saveNote(event: any) {
     event.preventDefault();
-    axios.post("/api/notes", {
-      folderId: noteData.folder.id,
+    const arr = {
+      folderId,
       title: noteData.title,
       content: noteData.content,
       isFavorite: false,
       isArchived: false,
-    });
+    };
+    if (noteId === "newNote") {
+      AxiosApi.post(`/notes`, arr).then(res => console.log(res))
+    } else {
+      AxiosApi.patch(`/notes/${noteId}`, arr);
+    }
   }
   return (
     <div className="w-full p-12 ">
@@ -89,6 +88,7 @@ function NotesViewer() {
             name="title"
             value={noteData.title}
             onChange={handleDataChange}
+            placeholder="Enter Title"
           />
           <div>
             <img
@@ -104,16 +104,25 @@ function NotesViewer() {
             ref={menuRef}
             className="absolute top-24 right-12 bg-[rgba(51,51,51,1)] p-4 flex flex-col gap-4 rounded w-55"
           >
-            <button className="flex gap-3 hover:opacity-80" onClick={() => handleMenu("favorite")}>
+            <button
+              className="flex gap-3 hover:opacity-80"
+              onClick={() => handleMenu("favorite")}
+            >
               <img src={favorite} className="color-white" />
-              Add to favorites
+              {noteData.isArchived ? "Remove from favorites" : "Add to favorites"}
             </button>
-            <button className="flex gap-3 hover:opacity-80" onClick={() => handleMenu("archive")}>
+            <button
+              className="flex gap-3 hover:opacity-80"
+              onClick={() => handleMenu("archive")}
+            >
               <img src={archive} />
-              Archived
+              {noteData.isFavorite ? "Remove from Archives" : "Add to archive"}
             </button>
             <hr className="text-[rgba(255,255,255,0.2)]" />
-            <button className="flex gap-3 hover:opacity-80" onClick={() => handleMenu("delete")}>
+            <button
+              className="flex gap-3 hover:opacity-80"
+              onClick={() => handleMenu("delete")}
+            >
               <img src={trash} />
               Delete
             </button>
@@ -133,7 +142,7 @@ function NotesViewer() {
               <img src={folder} alt="" className="w-4" />
               <p className="opacity-60">Folder</p>
             </div>
-            <p>Personal</p>
+            <p>{folderId ? folderName : noteData.folder.name}</p>
           </div>
         </div>
         <div className="pt-5">
@@ -144,10 +153,12 @@ function NotesViewer() {
             id="content"
             onChange={handleDataChange}
             value={noteData.content}
-            placeholder="Write your Note"
+            placeholder="Write your Note" 
           ></textarea>
         </div>
-        <button type="submit" className="bg-[#e50914] p-3 pl-7 pr-7 rounded hover:bg-red-700">submit</button>
+        <button type="submit" className="bg-[#e50914] p-3 pl-7 pr-7 rounded hover:bg-red-700">
+          submit
+        </button>
       </form>
     </div>
   );
