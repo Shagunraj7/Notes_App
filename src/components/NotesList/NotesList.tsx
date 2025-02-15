@@ -12,23 +12,23 @@ function NotesList() {
 
   useEffect(() => {
     let queryParams = { archived: "false", favorite: "false", deleted: "false",folderId };
-    if (location.pathname.startsWith("/favorites")) {
+    if (folderId){
+      queryParams.favorite = "true";
+      fetchNotes(queryParams);
+    }
+    else if (location.pathname.startsWith("/favorites")) {
+      queryParams.favorite = "true";
       setRoute("/favorites");
       fetchNotes(queryParams);
     } else if (location.pathname.startsWith("/archived")) {
       setRoute("/archived");
       queryParams.archived = "true";
-      queryParams.favorite = "false";
       fetchNotes(queryParams);
     } else if (location.pathname.startsWith("/trash")) {
       setRoute("/trash");
-      queryParams.favorite = "false";
       queryParams.deleted = "true";
       fetchNotes(queryParams);
-    } else if (folderId){
-      queryParams.folderId = folderId;
-      fetchNotes(queryParams);
-    }
+    } 
   }, [folderId, location.pathname]);
 
   function convertDate(fetchedDate: string): string {

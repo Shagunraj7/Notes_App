@@ -59,8 +59,8 @@ function NotesViewer() {
       folderId,
       title: noteData.title,
       content: noteData.content,
-      isFavorite: option === "favorite",
-      isArchived: option == "archive" ,
+      isFavorite: option == "favorite" ? !noteData.isFavorite : noteData.isFavorite,
+      isArchived: option == "archive" ? !noteData.isArchived : noteData.isArchived,
     });
   }
   function saveNote(event: any) {
@@ -73,7 +73,7 @@ function NotesViewer() {
       isArchived: false,
     };
     if (noteId === "newNote") {
-      AxiosApi.post(`/notes`, arr).then(res => console.log(res))
+      AxiosApi.post(`/notes`, arr)
     } else {
       AxiosApi.patch(`/notes/${noteId}`, arr);
     }
@@ -109,14 +109,14 @@ function NotesViewer() {
               onClick={() => handleMenu("favorite")}
             >
               <img src={favorite} className="color-white" />
-              {noteData.isArchived ? "Remove from favorites" : "Add to favorites"}
+              {noteData.isFavorite == true ? "Unfavorite" : "Add to favorites"}
             </button>
             <button
               className="flex gap-3 hover:opacity-80"
               onClick={() => handleMenu("archive")}
             >
               <img src={archive} />
-              {noteData.isFavorite ? "Remove from Archives" : "Add to archive"}
+              {noteData.isArchived == true ? "Unarchive" : "Add to archive"}
             </button>
             <hr className="text-[rgba(255,255,255,0.2)]" />
             <button
@@ -142,7 +142,7 @@ function NotesViewer() {
               <img src={folder} alt="" className="w-4" />
               <p className="opacity-60">Folder</p>
             </div>
-            <p>{folderId ? folderName : noteData.folder.name}</p>
+            <p>{folderId ? folderName : noteData && noteData.folder ? noteData.folder.name : ""}</p>
           </div>
         </div>
         <div className="pt-5">

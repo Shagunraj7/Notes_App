@@ -2,21 +2,27 @@ import { useNavigate , useParams } from "react-router-dom";
 
 import restore from "../../assets/restore.svg"
 import axios from "axios";
+import { useFolderContext } from "../../context/FolderContext";
+import { useEffect, useState } from "react";
 
 const AxiosApi = axios.create({ baseURL:'https://nowted-server.remotestate.com' });
 
 function Restore() {
   const {noteId} = useParams();
   const navigate = useNavigate();
+  const [noteName , setNoteName] = useState();
   function restoreNote() {
     AxiosApi.post(`/notes/${noteId}/restore`);
     navigate("/trash");
   }
+  useEffect(() => {
+    AxiosApi.get(`/notes/${noteId}`).then(res => setNoteName(res.data.note.title))
+  },[noteId]);
   return (
     <>
     {<div className="flex justify-center items-center h-screen w-full flex-col gap-4">
       <img src={restore} alt="" />
-      <p className="text-3xl">Restore </p>
+      <p className="text-3xl">Restore {noteName}</p>
       <p className="text-md text-center text-[rgba(255,255,255,0.5)]">
       Don't want to lose this note? It's not too late! Just click the 'Restore'<br/> button and it will be added back to your list. It's that simple.
       </p>

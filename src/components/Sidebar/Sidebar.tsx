@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useParams } from "react-router-dom";
 import logo from "../../assets/logo.svg";
 import search from "../../assets/search.svg";
 import addFolderIcon from "../../assets/folderLogo.svg";
@@ -20,7 +20,8 @@ const AxiosApi = axios.create({
 });
 
 function Sidebar() {
-  const { folders, activeFolder, fetchFolders, isLoading } = useFolderContext();
+  const { folders, activeFolder, setActiveFolder, fetchFolders, isLoading } =
+    useFolderContext();
   const { setActiveFolderName } = useFolderContext();
   const [searchOpen, setSearchOpen] = useState(false);
   const [recents, setRecents] = useState([]);
@@ -33,12 +34,10 @@ function Sidebar() {
     setAddFolder(false);
   }
   useEffect(() => {
-    {
-      fetchFolders();
-      AxiosApi.get("/notes/recent")
-        .then((res) => setRecents(res.data.recentNotes))
-        .catch((err) => console.log(err));
-    }
+    fetchFolders();
+    AxiosApi.get("/notes/recent")
+      .then((res) => setRecents(res.data.recentNotes))
+      .catch((err) => console.log(err));
   }, []);
 
   return (
@@ -126,6 +125,7 @@ function Sidebar() {
                     autoFocus
                     value={newFolderName}
                     onChange={(e) => setNewFolderName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addNewFolder()}
                     onBlur={addNewFolder}
                     className="border-1 border-white rounded pl-2"
                   />
@@ -137,8 +137,10 @@ function Sidebar() {
                     <NavLink
                       to={`/folders/${item.id}`}
                       className={({ isActive }) => {
-                        if (isActive)
+                        if (isActive) {
+                          setActiveFolder(item.id);
                           setActiveFolderName(item.name);
+                        }
                         return `hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4 ${
                           isActive
                             ? "text-white bg-[rgba(255,255,255,0.05)]"
@@ -165,12 +167,9 @@ function Sidebar() {
               <NavLink
                 to={`/favorites`}
                 className={({ isActive }) => {
-                  if (isActive)
-                    setActiveFolderName("Favorites");
+                  if (isActive) setActiveFolderName("Favorites");
                   return `hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive
-                      ? "text-white bg-[rgba(255,255,255,0.05)]"
-                      : ""
+                    isActive ? "text-white bg-[rgba(255,255,255,0.05)]" : ""
                   }`;
                 }}
               >
@@ -180,12 +179,9 @@ function Sidebar() {
               <NavLink
                 to={`/trash`}
                 className={({ isActive }) => {
-                  if (isActive)
-                    setActiveFolderName("Trash");
+                  if (isActive) setActiveFolderName("Trash");
                   return `hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive
-                      ? "text-white bg-[rgba(255,255,255,0.05)]"
-                      : ""
+                    isActive ? "text-white bg-[rgba(255,255,255,0.05)]" : ""
                   }`;
                 }}
               >
@@ -195,12 +191,9 @@ function Sidebar() {
               <NavLink
                 to={`/archived`}
                 className={({ isActive }) => {
-                  if (isActive)
-                    setActiveFolderName("Archived");
+                  if (isActive) setActiveFolderName("Archived");
                   return `hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive
-                      ? "text-white bg-[rgba(255,255,255,0.05)]"
-                      : ""
+                    isActive ? "text-white bg-[rgba(255,255,255,0.05)]" : ""
                   }`;
                 }}
               >
