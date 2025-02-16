@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
@@ -32,7 +33,10 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     })
     .then((response) => setNotes(response.data.notes))
     .then((res) => setLoading(false))
-    .catch((err) => navigate('/'));
+    .catch((err) => {
+      toast.error('Invalid Path');
+      navigate('/');
+    })
   };
 
   return (

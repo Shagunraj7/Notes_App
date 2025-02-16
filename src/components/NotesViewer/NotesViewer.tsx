@@ -8,13 +8,14 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { useFolderContext } from "../../context/FolderContext";
+import { toast } from 'react-toastify';
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
 });
 
 function getDate(str: string) {
-  const currentDate = new Date(str);
+  const currentDate = str ? new Date(str) : new Date();
   const day = String(currentDate.getDate()).padStart(2, "0");
   const month = String(currentDate.getMonth() + 1).padStart(2, "0");
   const year = currentDate.getFullYear();
@@ -25,6 +26,7 @@ function getDate(str: string) {
 function NotesViewer() {
   const [noteData, setNoteData] = useState({});
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const { noteId, folderId } = useParams();
   const { folderName } = useFolderContext();
   const navigate = useNavigate();
@@ -32,7 +34,12 @@ function NotesViewer() {
 
   useEffect(() => {
     if (!noteId || noteId === "newNote") return;
-    AxiosApi.get(`/notes/${noteId}`).then((res) => setNoteData(res.data.note)).catch(err => navigate("/") );
+    AxiosApi.get(`/notes/${noteId}`)
+      .then((res) => setNoteData(res.data.note))
+      .catch((err) => {
+        toast.error('Invalid Path');
+        navigate("/")
+      });
   }, [noteId]);
 
   useEffect(() => {
@@ -67,10 +74,11 @@ function NotesViewer() {
         option == "favorite" ? !noteData.isFavorite : noteData.isFavorite,
       isArchived:
         option == "archive" ? !noteData.isArchived : noteData.isArchived,
-    });
+    }).then(res => toast.success('Changes Saved'));
   }
   function saveNote(event: any) {
     event.preventDefault();
+    setIsSubmitLoading(true);
     const arr = {
       folderId,
       title: noteData.title,
@@ -79,9 +87,11 @@ function NotesViewer() {
       isArchived: false,
     };
     if (noteId === "newNote") {
-      AxiosApi.post(`/notes`, arr);
+      AxiosApi.post(`/notes`, arr).then((res) => setIsSubmitLoading(false)).then(res => toast.success('Note Saved'));
     } else {
-      AxiosApi.patch(`/notes/${noteId}`, arr);
+      AxiosApi.patch(`/notes/${noteId}`, arr).then((res) =>
+        setIsSubmitLoading(false)
+      ).then(res => toast.success('Note Saved')).then(res => toast.success('Note Saved'));
     }
   }
   return (
@@ -141,9 +151,7 @@ function NotesViewer() {
               <p className="opacity-60">Date</p>
             </div>
             <p>
-              {noteData && noteData.createdAt
-                ? getDate(noteData.createdAt)
-                : getDate("")}
+              {noteData && noteData.createdAt ? getDate(noteData.createdAt) : getDate("")}
             </p>
           </div>
           <hr className="border-gray-700 my-2" />
@@ -153,11 +161,7 @@ function NotesViewer() {
               <p className="opacity-60">Folder</p>
             </div>
             <p>
-              {folderId
-                ? folderName
-                : noteData && noteData.folder
-                ? noteData.folder.name
-                : ""}
+              {folderId ? folderName : noteData && noteData.folder ? noteData.folder.name : ""}
             </p>
           </div>
         </div>
@@ -174,9 +178,13 @@ function NotesViewer() {
         </div>
         <button
           type="submit"
-          className="customRed p-3 pl-7 pr-7 rounded hover:bg-red-700"
+          onClick={saveNote}
+          className={`customRed p-3 w-full rounded transition-all duration-300 ${
+            isSubmitLoading ? "opacity-70" : "hover:bg-red-700"
+          }`}
+          disabled={isSubmitLoading}
         >
-          submit
+          {isSubmitLoading ? "Saving..." : "Save Note"}
         </button>
       </form>
     </div>

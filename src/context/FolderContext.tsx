@@ -27,7 +27,7 @@ export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [folderName, setActiveFolderName] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-  
+
   const fetchFolders = () => {
     setIsLoading(true);
     AxiosApi
@@ -37,10 +37,13 @@ export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setFolders(fetchedFolders);
         if (!activeFolder) {
           setActiveFolder(fetchedFolders[0].id);
-          setActiveFolderName(fetchedFolders[0].name); // Set the folder name when setting the active folder
+          setActiveFolderName(fetchedFolders[0].name); 
         }
       })
-      .catch((err) => navigate('/'))
+      .catch((err) => {
+        toast.error('Invalid Path');
+        navigate('/')
+      })
       .finally(() => setIsLoading(false));
   };
 

@@ -2,6 +2,7 @@ import { useNavigate , useParams } from "react-router-dom";
 import restore from "../../assets/restore.svg"
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { toast } from 'react-toastify';
 
 const AxiosApi = axios.create({ baseURL:'https://nowted-server.remotestate.com' });
 
@@ -10,7 +11,7 @@ function Restore() {
   const navigate = useNavigate();
   const [noteName , setNoteName] = useState();
   function restoreNote() {
-    AxiosApi.post(`/notes/${noteId}/restore`);
+    AxiosApi.post(`/notes/${noteId}/restore`).then(res => toast.success('Note Restored'));
     navigate("/trash");
   }
   useEffect(() => {

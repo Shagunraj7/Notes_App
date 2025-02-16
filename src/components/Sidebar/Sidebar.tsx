@@ -167,8 +167,8 @@ function Sidebar() {
                 to={`/favorites`}
                 className={({ isActive }) => {
                   if (isActive) setActiveFolderName("Favorites");
-                  return `hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive ? "text-white bg-[rgba(255,255,255,0.05)]" : ""
+                  return `pl-5 pt-3 pb-3 flex gap-4 ${
+                    isActive ? "text-white customRed" : "hover:bg-[rgba(255,255,255,0.05)]"
                   }`;
                 }}
               >
@@ -179,8 +179,8 @@ function Sidebar() {
                 to={`/trash`}
                 className={({ isActive }) => {
                   if (isActive) setActiveFolderName("Trash");
-                  return `hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive ? "text-white bg-[rgba(255,255,255,0.05)]" : ""
+                  return ` pl-5 pt-3 pb-3 flex gap-4 ${
+                    isActive ? "text-white customRed" : "hover:bg-[rgba(255,255,255,0.05)]"
                   }`;
                 }}
               >
@@ -191,8 +191,8 @@ function Sidebar() {
                 to={`/archived`}
                 className={({ isActive }) => {
                   if (isActive) setActiveFolderName("Archived");
-                  return `hover:bg-[rgba(255,255,255,0.05)] pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive ? "text-white bg-[rgba(255,255,255,0.05)]" : ""
+                  return `pl-5 pt-3 pb-3 flex gap-4 ${
+                    isActive ? "text-white customRed" : "hover:bg-[rgba(255,255,255,0.05)]"
                   }`;
                 }}
               >
