@@ -6,12 +6,17 @@ import { useFolderContext } from "../../context/FolderContext";
 
 function NotesList() {
   const { notes, isLoading, fetchNotes } = useNotes();
+  const [currentPage , setCurrentPage ] = useState(1);
   const { folderName } = useFolderContext();
   const { folderId  } = useParams();
   const [route , setRoute] = useState("");
 
   useEffect(() => {
-    let queryParams = { archived: "false", favorite: "false", deleted: "false",folderId };
+    setCurrentPage(1);
+  }, [folderId]);
+
+  useEffect(() => {
+    const queryParams = { archived: "false", favorite: "false", deleted: "false", page: currentPage ,folderId };
     if (location.pathname.startsWith("/favorites")) {
       queryParams.folderId = "";
       queryParams.favorite = "true";
@@ -32,7 +37,7 @@ function NotesList() {
       queryParams.favorite = "";
       fetchNotes(queryParams);
     }
-  }, [folderId]);
+  }, [folderId , currentPage]);
 
   function convertDate(fetchedDate: string): string {
     const date = new Date(fetchedDate);
@@ -47,7 +52,7 @@ function NotesList() {
   return (
     <>
       <div className="flex flex-col p-4 pt-6 bg-[#1C1C1C] gap-5">
-        {isLoading ? (
+        {isLoading  && notes.length == 0 ? (
           <Shimmer />
         ) : (
           <div>
@@ -74,6 +79,7 @@ function NotesList() {
                   </div>
                 </NavLink>
               ))}
+            {notes.length >= 10 && notes.length % 10 == 0 && <button className="bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.08)] p-3 pl-6 pr-6 cursor-pointer" onClick={() => setCurrentPage(prev => prev+1)}>Load More</button>}
             </div>
           </div>
         )}

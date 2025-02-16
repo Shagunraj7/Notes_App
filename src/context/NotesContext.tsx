@@ -31,7 +31,13 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
         limit: 10,
       },
     })
-    .then((response) => setNotes(response.data.notes))
+    .then((response) => {
+      if (page === 1) {
+        setNotes(response.data.notes);
+      } else {
+        setNotes((prevNotes) => [...prevNotes, ...response.data.notes]);
+      }
+    })
     .then((res) => setLoading(false))
     .catch((err) => {
       toast.error('Invalid Path');
