@@ -37,7 +37,6 @@ function Sidebar() {
     fetchFolders();
     AxiosApi.get("/notes/recent")
       .then((res) => setRecents(res.data.recentNotes))
-      .catch((err) => console.log(err));
   }, []);
 
   return (

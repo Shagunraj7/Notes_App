@@ -1,33 +1,38 @@
 import date from "../../assets/date.svg";
-import option from "../../assets/option.svg"
+import option from "../../assets/option.svg";
 import folder from "../../assets/folder.svg";
 import archive from "../../assets/archive.svg";
 import trash from "../../assets/trash.svg";
 import favorite from "../../assets/favorite.svg";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { useParams , useNavigate} from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useFolderContext } from "../../context/FolderContext";
 
-const AxiosApi = axios.create({ baseURL: "https://nowted-server.remotestate.com",});
-const currentDate = new Date();
-const day = String(currentDate.getDate()).padStart(2, "0");
-const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-const year = currentDate.getFullYear();
+const AxiosApi = axios.create({
+  baseURL: "https://nowted-server.remotestate.com",
+});
 
-const formattedDate = `${day}/${month}/${year}`;
+function getDate(str: string) {
+  const currentDate = new Date(str);
+  const day = String(currentDate.getDate()).padStart(2, "0");
+  const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+  const year = currentDate.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
 
 function NotesViewer() {
   const [noteData, setNoteData] = useState({});
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const { noteId , folderId } = useParams();
-  const { folderName }  = useFolderContext();
+  const { noteId, folderId } = useParams();
+  const { folderName } = useFolderContext();
   const navigate = useNavigate();
   const menuRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     if (!noteId || noteId === "newNote") return;
-    AxiosApi.get(`/notes/${noteId}`).then((res) => setNoteData(res.data.note));
+    AxiosApi.get(`/notes/${noteId}`).then((res) => setNoteData(res.data.note)).catch(err => navigate("/") );
   }, [noteId]);
 
   useEffect(() => {
@@ -36,8 +41,7 @@ function NotesViewer() {
         setOptionsOpen(false);
     };
 
-    if (optionsOpen)
-      document.addEventListener("mousedown", handleClickOutside);
+    if (optionsOpen) document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -59,8 +63,10 @@ function NotesViewer() {
       folderId,
       title: noteData.title,
       content: noteData.content,
-      isFavorite: option == "favorite" ? !noteData.isFavorite : noteData.isFavorite,
-      isArchived: option == "archive" ? !noteData.isArchived : noteData.isArchived,
+      isFavorite:
+        option == "favorite" ? !noteData.isFavorite : noteData.isFavorite,
+      isArchived:
+        option == "archive" ? !noteData.isArchived : noteData.isArchived,
     });
   }
   function saveNote(event: any) {
@@ -73,7 +79,7 @@ function NotesViewer() {
       isArchived: false,
     };
     if (noteId === "newNote") {
-      AxiosApi.post(`/notes`, arr)
+      AxiosApi.post(`/notes`, arr);
     } else {
       AxiosApi.patch(`/notes/${noteId}`, arr);
     }
@@ -134,7 +140,11 @@ function NotesViewer() {
               <img src={date} alt="" className="w-4" />
               <p className="opacity-60">Date</p>
             </div>
-            <p>{formattedDate}</p>
+            <p>
+              {noteData && noteData.createdAt
+                ? getDate(noteData.createdAt)
+                : getDate("")}
+            </p>
           </div>
           <hr className="border-gray-700 my-2" />
           <div className="flex items-center w-full">
@@ -142,7 +152,13 @@ function NotesViewer() {
               <img src={folder} alt="" className="w-4" />
               <p className="opacity-60">Folder</p>
             </div>
-            <p>{folderId ? folderName : noteData && noteData.folder ? noteData.folder.name : ""}</p>
+            <p>
+              {folderId
+                ? folderName
+                : noteData && noteData.folder
+                ? noteData.folder.name
+                : ""}
+            </p>
           </div>
         </div>
         <div className="pt-5">
@@ -153,10 +169,13 @@ function NotesViewer() {
             id="content"
             onChange={handleDataChange}
             value={noteData.content}
-            placeholder="Write your Note" 
+            placeholder="Write your Note"
           ></textarea>
         </div>
-        <button type="submit" className="bg-[#e50914] p-3 pl-7 pr-7 rounded hover:bg-red-700">
+        <button
+          type="submit"
+          className="customRed p-3 pl-7 pr-7 rounded hover:bg-red-700"
+        >
           submit
         </button>
       </form>

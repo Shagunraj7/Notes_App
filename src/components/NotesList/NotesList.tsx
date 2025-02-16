@@ -12,24 +12,27 @@ function NotesList() {
 
   useEffect(() => {
     let queryParams = { archived: "false", favorite: "false", deleted: "false",folderId };
-    if (folderId){
-      queryParams.favorite = "true";
-      fetchNotes(queryParams);
-    }
-    else if (location.pathname.startsWith("/favorites")) {
+    if (location.pathname.startsWith("/favorites")) {
+      queryParams.folderId = "";
       queryParams.favorite = "true";
       setRoute("/favorites");
       fetchNotes(queryParams);
     } else if (location.pathname.startsWith("/archived")) {
       setRoute("/archived");
+      queryParams.favorite = "";
       queryParams.archived = "true";
+      queryParams.folderId = "";
       fetchNotes(queryParams);
     } else if (location.pathname.startsWith("/trash")) {
       setRoute("/trash");
       queryParams.deleted = "true";
+      queryParams.folderId = "";
       fetchNotes(queryParams);
-    } 
-  }, [folderId, location.pathname]);
+    } else if (folderId){
+      queryParams.favorite = "";
+      fetchNotes(queryParams);
+    }
+  }, [folderId]);
 
   function convertDate(fetchedDate: string): string {
     const date = new Date(fetchedDate);

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface Folder {
   id: string;
@@ -25,7 +26,8 @@ export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
   const [folderName, setActiveFolderName] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
+  const navigate = useNavigate();
+  
   const fetchFolders = () => {
     setIsLoading(true);
     AxiosApi
@@ -38,7 +40,7 @@ export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           setActiveFolderName(fetchedFolders[0].name); // Set the folder name when setting the active folder
         }
       })
-      .catch((err) => console.error(err))
+      .catch((err) => navigate('/'))
       .finally(() => setIsLoading(false));
   };
 

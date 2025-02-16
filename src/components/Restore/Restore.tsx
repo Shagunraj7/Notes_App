@@ -1,8 +1,6 @@
 import { useNavigate , useParams } from "react-router-dom";
-
 import restore from "../../assets/restore.svg"
 import axios from "axios";
-import { useFolderContext } from "../../context/FolderContext";
 import { useEffect, useState } from "react";
 
 const AxiosApi = axios.create({ baseURL:'https://nowted-server.remotestate.com' });
