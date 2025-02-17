@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.svg";
 import search from "../../assets/search.svg";
 import favorite from "../../assets/favorite.svg";
@@ -11,6 +11,8 @@ import { useFolderContext } from "../../context/FolderContext";
 import Shimmer from "./Shimmer";
 import FoldersList from "./FoldersList/FoldersList";
 import RecentsList from "./RecentsList/RecentsList";
+import { useNotes } from "../../context/NotesContext";
+import SearchBar from "./SearchBar/SearchBar";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
@@ -19,14 +21,30 @@ const AxiosApi = axios.create({
 function Sidebar() {
   const { activeFolder, fetchFolders, isLoading } = useFolderContext();
   const { setActiveFolderName } = useFolderContext();
+  const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const [recents, setRecents] = useState([]);
+  const { notes, fetchNotes } = useNotes();
 
   useEffect(() => {
     fetchFolders();
-    AxiosApi.get("/notes/recent")
-    .then((res) => setRecents(res.data.recentNotes))
+    AxiosApi.get("/notes/recent").then((res) =>
+      setRecents(res.data.recentNotes)
+    );
   }, []);
+
+  function addNewNote() {
+    AxiosApi.post(`/notes`, {
+      folderId: activeFolder,
+      title: "New Note",
+      content: "",
+      isFavorite: false,
+      isArchived: false,
+    }).then(res => {
+      fetchNotes({folderId : activeFolder});
+      navigate(`/folders/${activeFolder}/notes/${res.data.id}`);
+    });
+  }
 
   return (
     <div className="flex">
@@ -47,30 +65,22 @@ function Sidebar() {
               onClick={() => setSearchOpen((prev) => !prev)}
             />
           </div>
-          {searchOpen && (
-            <div>
-              <input
-                type="text"
-                autoFocus
-                className="focus:outline-none focus:border-[#e50914] p-3 rounded w-full border-1 border-[rgba(255,255,255,0.2)] "
-              />
-            </div>
-          )}
+          {searchOpen && <SearchBar/>}
           {!searchOpen && (
-            <Link
-              to={`/folders/${activeFolder}/notes/newNote`}
-              className="bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] p-3 flex justify-center items-center gap-2"
+            <button
+              onClick={addNewNote}
+              className="bg-dark-0 hover:bg-dark-1 p-3 flex justify-center items-center gap-2"
             >
               <img src={plus} alt="" />
               New Note
-            </Link>
+            </button>
           )}
         </div>
-        {isLoading ? (
+        {isLoading && !recents ? (
           <Shimmer />
         ) : (
-          <div className="flex flex-col gap-5 text-[rgba(255,255,255,0.6)]">
-          <RecentsList recents={recents}/>
+          <div className="flex flex-col gap-5 text-dark-10">
+            <RecentsList recents={recents} />
             <FoldersList />
             <ul>
               <p className="text-xs text-gray-400 pl-5 pb-2">More</p>
@@ -79,7 +89,9 @@ function Sidebar() {
                 className={({ isActive }) => {
                   if (isActive) setActiveFolderName("Favorites");
                   return `pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive ? "text-white customRed" : "hover:bg-[rgba(255,255,255,0.05)]"
+                    isActive
+                      ? "text-white bg-netflix"
+                      : "hover:bg-dark-0"
                   }`;
                 }}
               >
@@ -91,7 +103,9 @@ function Sidebar() {
                 className={({ isActive }) => {
                   if (isActive) setActiveFolderName("Trash");
                   return ` pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive ? "text-white customRed" : "hover:bg-[rgba(255,255,255,0.05)]"
+                    isActive
+                      ? "text-white bg-netflix"
+                      : "hover:bg-dark-0"
                   }`;
                 }}
               >
@@ -103,7 +117,9 @@ function Sidebar() {
                 className={({ isActive }) => {
                   if (isActive) setActiveFolderName("Archived");
                   return `pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive ? "text-white customRed" : "hover:bg-[rgba(255,255,255,0.05)]"
+                    isActive
+                      ? "text-white bg-netflix"
+                      : "hover:bg-dark-0"
                   }`;
                 }}
               >

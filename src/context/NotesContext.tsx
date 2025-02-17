@@ -19,6 +19,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     archived = "false",
     favorite = "false",
     deleted = "false",
+    search = "",
   }) => {
     setLoading(true);
     AxiosApi.get(`/notes`, {
@@ -29,6 +30,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
         folderId,
         page,
         limit: 10,
+        search,
       },
     })
     .then((response) => {

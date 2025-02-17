@@ -15,13 +15,22 @@
     background-position: 200% 0;
   }
 }
-
+@theme {
+  --color-dark-0: oklch(0.21 0 0);
+  --color-dark-1: oklch(0.27 0 0);
+  --color-dark-2: oklch(0.34 0 0);
+  --color-dark-5: oklch(32.11% 0 0);
+  --color-dark-10: oklch(0.6 0 0);
+  --color-netflix: oklch(0.53 0.27 28);
+}
 @layer utilities {
-  .customRed {
-    background: #e50914;
-  }
   .shimmer {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.05) 100%);
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05) 25%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.05) 100%
+    );
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border-radius: 4px;
