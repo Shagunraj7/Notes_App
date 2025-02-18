@@ -8,7 +8,7 @@ import Favorites from "./pages/Favorites";
 function Router() {
   return (
     <Routes>
-      <Route path="/" element={ <Navigate to={"/folders/fd9bb48a-d86c-40a8-8b18-47f264597c5e"} /> }/>
+      <Route path="/" element={ <Navigate to={"/folders/053bc662-988e-4460-846c-f5f91a320da4"} /> }/>
       <Route path="folders/:folderId" element={<Home />} />
       <Route path="folders/:folderId/notes/:noteId" element={<Home />} />
       <Route path="trash/*" element={<Home />} />

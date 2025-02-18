@@ -2,10 +2,20 @@ import archive from "../../../assets/archive.svg";
 import trash from "../../../assets/trash.svg";
 import favorite from "../../../assets/favorite.svg";
 import { useEffect, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useNotes } from "../../../context/NotesContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 
+const AxiosApi = axios.create({
+  baseURL: "https://nowted-server.remotestate.com",
+});
 
-function Menu({optionsOpen , setOptionsOpen , noteData , handleMenu}) {
-    const menuRef = useRef<HTMLDivElement>(null);
+function Menu({ optionsOpen, setOptionsOpen, noteData }) {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { fetchNotes } = useNotes();
+  const navigate = useNavigate();
+  const { folderId } = useParams();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -20,9 +30,53 @@ function Menu({optionsOpen , setOptionsOpen , noteData , handleMenu}) {
     };
   }, [optionsOpen]);
 
+  function handleMenu(option: string) {
+    if (option == "delete") {
+      AxiosApi.delete(`/notes/${noteId}`);
+      setTimeout(() => navigate(`/trash/${noteId}`), 100);
+    }
+    AxiosApi.patch(`/notes/${noteId}`, {
+      folderId,
+      title: noteData.title,
+      content: noteData.content,
+      isFavorite:
+        option == "favorite" ? !noteData.isFavorite : noteData.isFavorite,
+      isArchived:
+        option == "archive" ? !noteData.isArchived : noteData.isArchived,
+    }).then(() => {
+      setTimeout(() => {
+        const queryParams = {
+          archived: "false",
+          favorite: "false",
+          deleted: "false",
+          folderId,
+        };
+        if (location.pathname.startsWith("/favorites")) {
+          queryParams.folderId = "";
+          queryParams.favorite = "true";
+          fetchNotes(queryParams);
+        } else if (location.pathname.startsWith("/archived")) {
+          queryParams.favorite = "";
+          queryParams.archived = "true";
+          queryParams.folderId = "";
+          fetchNotes(queryParams);
+        } else if (location.pathname.startsWith("/trash")) {
+          queryParams.deleted = "true";
+          queryParams.folderId = "";
+          fetchNotes(queryParams);
+        } else if (folderId) {
+          queryParams.favorite = "";
+          fetchNotes(queryParams);
+        }
+        fetchNotes(queryParams);
+        toast.success("Changes Saved");
+      }, 500);
+    });
+  }
+
   return (
     <>
-    {optionsOpen && (
+      {optionsOpen && (
         <div
           ref={menuRef}
           className="absolute top-24 right-12 bg-dark-5 p-4 flex flex-col gap-4 rounded w-55"
@@ -52,7 +106,7 @@ function Menu({optionsOpen , setOptionsOpen , noteData , handleMenu}) {
         </div>
       )}
     </>
-  )
+  );
 }
 
-export default Menu
+export default Menu;

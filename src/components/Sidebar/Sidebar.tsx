@@ -1,18 +1,27 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.svg";
 import search from "../../assets/search.svg";
 import favorite from "../../assets/favorite.svg";
 import trash from "../../assets/trash.svg";
 import archive from "../../assets/archive.svg";
 import plus from "../../assets/plus.svg";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { useFolderContext } from "../../context/FolderContext";
 import Shimmer from "./Shimmer";
 import FoldersList from "./FoldersList/FoldersList";
 import RecentsList from "./RecentsList/RecentsList";
 import { useNotes } from "../../context/NotesContext";
 import SearchBar from "./SearchBar/SearchBar";
+
+interface RecentNote {
+  id: string;
+  title: string;
+  content: string;
+  isFavorite: boolean;
+  isArchived: boolean;
+  folderId: string;
+}
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
@@ -22,26 +31,26 @@ function Sidebar() {
   const { activeFolder, fetchFolders, isLoading } = useFolderContext();
   const { setActiveFolderName } = useFolderContext();
   const navigate = useNavigate();
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [recents, setRecents] = useState([]);
-  const { notes, fetchNotes } = useNotes();
+  const [searchOpen, setSearchOpen] = useState<boolean>(false);
+  const [recents, setRecents] = useState<RecentNote[]>([]);
+  const { fetchNotes } = useNotes();
 
   useEffect(() => {
     fetchFolders();
-    AxiosApi.get("/notes/recent").then((res) =>
+    AxiosApi.get<{ recentNotes: RecentNote[] }>("/notes/recent").then((res: AxiosResponse<{ recentNotes: RecentNote[] }>) =>
       setRecents(res.data.recentNotes)
     );
-  }, []);
+  }, [fetchFolders]);
 
   function addNewNote() {
-    AxiosApi.post(`/notes`, {
+    AxiosApi.post<{ id: string }>(`/notes`, {
       folderId: activeFolder,
       title: "New Note",
       content: "",
       isFavorite: false,
       isArchived: false,
-    }).then(res => {
-      fetchNotes({folderId : activeFolder});
+    }).then((res: AxiosResponse<{ id: string }>) => {
+      fetchNotes({ folderId: activeFolder });
       navigate(`/folders/${activeFolder}/notes/${res.data.id}`);
     });
   }
@@ -65,11 +74,11 @@ function Sidebar() {
               onClick={() => setSearchOpen((prev) => !prev)}
             />
           </div>
-          {searchOpen && <SearchBar/>}
+          {searchOpen && <SearchBar />}
           {!searchOpen && (
             <button
               onClick={addNewNote}
-              className="bg-dark-0 hover:bg-dark-1 p-3 flex justify-center items-center gap-2"
+              className="bg-dark-1 hover:bg-dark-2 p-3 flex justify-center items-center gap-2"
             >
               <img src={plus} alt="" />
               New Note

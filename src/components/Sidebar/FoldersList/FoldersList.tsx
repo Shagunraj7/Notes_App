@@ -12,8 +12,7 @@ const AxiosApi = axios.create({
 });
 
 function FoldersList({}) {
-  const { folders, setActiveFolder, fetchFolders, setActiveFolderName } =
-    useFolderContext();
+  const { folders, setActiveFolder, fetchFolders, setActiveFolderName } =useFolderContext();
   const [editingFolderId, setEditingFolderId] = useState(null);
   const [editedFolderName, setEditedFolderName] = useState("");
 
@@ -66,8 +65,8 @@ function FoldersList({}) {
                     setActiveFolder(item.id);
                     setActiveFolderName(item.name);
                   }
-                  return `hover:bg-dark-0 pl-5 p-3 flex gap-4 ${
-                    isActive ? "text-white bg-dark-0" : ""
+                  return `hover:bg-dark-1 pl-5 p-3 flex gap-4 ${
+                    isActive ? "text-white bg-dark-2" : ""
                   }`;
                 }}
                 key={index}

@@ -13,10 +13,6 @@ function NotesList() {
   const [route, setRoute] = useState("");
 
   useEffect(() => {
-    console.log(notes);
-  },[notes]);
-
-  useEffect(() => {
     setCurrentPage(1);
   }, [folderId]);
 

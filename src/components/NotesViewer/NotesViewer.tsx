@@ -3,7 +3,6 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import NoteDetails from "./NoteDetails/NoteDetails";
-import getDate from "../../context/getDate";
 import debounce from "lodash.debounce";
 
 const AxiosApi = axios.create({
@@ -12,7 +11,7 @@ const AxiosApi = axios.create({
 
 function NotesViewer() {
   const [noteData, setNoteData] = useState({});
-  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
+  const [folderChange, setFolderChange] = useState(false);
   const { noteId, folderId } = useParams();
   const navigate = useNavigate();
 
@@ -23,7 +22,7 @@ function NotesViewer() {
     }
     AxiosApi.get(`/notes/${noteId}`)
       .then((res) => setNoteData(res.data.note))
-      .catch((err) => {
+      .catch(() => {
         toast.error("Invalid Path");
         navigate("/");
       });
@@ -32,24 +31,31 @@ function NotesViewer() {
   const saveNote = useCallback(
     debounce(async () => {
       const arr = {
-        folderId,
+        folderId: noteData.folderId,
         title: noteData.title,
         content: noteData.content,
         isFavorite: false,
         isArchived: false,
       };
-      AxiosApi.patch(`/notes/${noteId}`, arr);
+      AxiosApi.patch(`/notes/${noteId}`, arr).then(() => {
+        if(noteData.folderId && noteData.folderId !== folderId) {
+          setFolderChange(false);
+          navigate(`/folders/${noteData.folderId}/notes/${noteId}`);
+        }
+      })
     }, 500),
     [noteData, noteId, folderId]
   );
-
-  function handleDataChange(event) {
-    const { name, value } = event.target;
+  useEffect(() => {
+    saveNote();
+  },[noteData]);
+  function handleDataChange(event: React.MouseEvent<HTMLButtonElement>) {
+    const name = event.target.name;
+    const value = event.target.name == "folderId" ? event.currentTarget.dataset.id : event.target.value;
     setNoteData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
-    saveNote();
   }
 
   return (
@@ -57,12 +63,13 @@ function NotesViewer() {
       <NoteDetails
         noteData={noteData}
         handleDataChange={handleDataChange}
-        getDate={getDate}
+        folderChange={folderChange}
+        setFolderChange={setFolderChange}
       />
       <div className="pt-5">
         <textarea
           className="w-full focus:outline-none"
-          rows={28}
+          rows={32}
           name="content"
           id="content"
           onChange={handleDataChange}

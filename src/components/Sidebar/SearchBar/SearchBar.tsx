@@ -21,7 +21,6 @@ function SearchBar() {
           search: query,
         },
       }).then((res) => {
-        console.log(res.data.notes);
         setNotes(res.data.notes);
       });
     }, 500),
