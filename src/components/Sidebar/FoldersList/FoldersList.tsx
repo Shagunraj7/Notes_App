@@ -13,8 +13,8 @@ const AxiosApi = axios.create({
 
 function FoldersList({}) {
   const { folders, setActiveFolder, fetchFolders, setActiveFolderName } =useFolderContext();
-  const [editingFolderId, setEditingFolderId] = useState(null);
-  const [editedFolderName, setEditedFolderName] = useState("");
+  const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
+  const [editedFolderName, setEditedFolderName] = useState<string>("");
 
   function addNewFolder() {
     AxiosApi.post("/folders", { name: "New Folder" });
@@ -22,7 +22,7 @@ function FoldersList({}) {
       fetchFolders();
     }, 500);
   }
-  const handleEditFolder = (folderId, currentName) => {
+  const handleEditFolder = (folderId : string, currentName: string) => {
     setEditingFolderId(folderId);
     setEditedFolderName(currentName);
   };

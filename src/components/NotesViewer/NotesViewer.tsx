@@ -34,11 +34,11 @@ function NotesViewer() {
         folderId: noteData.folderId,
         title: noteData.title,
         content: noteData.content,
-        isFavorite: false,
-        isArchived: false,
+        isFavorite: noteData.isFavorite,
+        isArchived: noteData.isArchived,
       };
       AxiosApi.patch(`/notes/${noteId}`, arr).then(() => {
-        if(noteData.folderId && noteData.folderId !== folderId) {
+        if(noteData.folderId && folderId && noteData.folderId !== folderId) {
           setFolderChange(false);
           navigate(`/folders/${noteData.folderId}/notes/${noteId}`);
         }
@@ -51,6 +51,19 @@ function NotesViewer() {
   },[noteData]);
   function handleDataChange(event: React.MouseEvent<HTMLButtonElement>) {
     const name = event.target.name;
+    if(name == "isFavorite") {
+      setNoteData((prevData) => ({
+        ...prevData,
+        [name]: !noteData.isFavorite,
+      }));
+      return;
+    } else if(name == "isArchived") {
+      setNoteData((prevData) => ({
+        ...prevData,
+        [name]: !noteData.isArchived,
+      }));
+      return;
+    }
     const value = event.target.name == "folderId" ? event.currentTarget.dataset.id : event.target.value;
     setNoteData((prevData) => ({
       ...prevData,

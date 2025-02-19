@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 
 interface Folder {
   id: string;
@@ -27,7 +25,6 @@ export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
   const [folderName, setActiveFolderName] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const navigate = useNavigate();
 
   const fetchFolders = () => {
     setIsLoading(true);
@@ -41,11 +38,7 @@ export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           setActiveFolderName(fetchedFolders[0].name); 
         }
       })
-      .catch((err) => {
-        toast.error('Invalid Path');
-        navigate('/')
-      })
-      .finally(() => setIsLoading(false));
+      .then(() => setIsLoading(false));
   };
 
   useEffect(() => {

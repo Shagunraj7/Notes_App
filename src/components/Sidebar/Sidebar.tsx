@@ -40,7 +40,7 @@ function Sidebar() {
     AxiosApi.get<{ recentNotes: RecentNote[] }>("/notes/recent").then((res: AxiosResponse<{ recentNotes: RecentNote[] }>) =>
       setRecents(res.data.recentNotes)
     );
-  }, [fetchFolders]);
+  }, []);
 
   function addNewNote() {
     AxiosApi.post<{ id: string }>(`/notes`, {

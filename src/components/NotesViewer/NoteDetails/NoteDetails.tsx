@@ -51,6 +51,7 @@ function NoteDetails({ noteData, handleDataChange , folderChange , setFolderChan
       <Menu
         optionsOpen={optionsOpen}
         setOptionsOpen={setOptionsOpen}
+        handleDataChange={handleDataChange}
         noteData={noteData}
       />
       <div className="flex flex-col gap-2">

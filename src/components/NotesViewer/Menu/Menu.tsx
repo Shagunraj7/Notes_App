@@ -11,11 +11,11 @@ const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
 });
 
-function Menu({ optionsOpen, setOptionsOpen, noteData }) {
+function Menu({ optionsOpen, setOptionsOpen, noteData , handleDataChange}) {
   const menuRef = useRef<HTMLDivElement>(null);
   const { fetchNotes } = useNotes();
   const navigate = useNavigate();
-  const { folderId } = useParams();
+  const { folderId , noteId} = useParams();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -30,48 +30,12 @@ function Menu({ optionsOpen, setOptionsOpen, noteData }) {
     };
   }, [optionsOpen]);
 
-  function handleMenu(option: string) {
-    if (option == "delete") {
+  function handleMenu(event) {
+    if (event.target.name == "delete") {
       AxiosApi.delete(`/notes/${noteId}`);
       setTimeout(() => navigate(`/trash/${noteId}`), 100);
     }
-    AxiosApi.patch(`/notes/${noteId}`, {
-      folderId,
-      title: noteData.title,
-      content: noteData.content,
-      isFavorite:
-        option == "favorite" ? !noteData.isFavorite : noteData.isFavorite,
-      isArchived:
-        option == "archive" ? !noteData.isArchived : noteData.isArchived,
-    }).then(() => {
-      setTimeout(() => {
-        const queryParams = {
-          archived: "false",
-          favorite: "false",
-          deleted: "false",
-          folderId,
-        };
-        if (location.pathname.startsWith("/favorites")) {
-          queryParams.folderId = "";
-          queryParams.favorite = "true";
-          fetchNotes(queryParams);
-        } else if (location.pathname.startsWith("/archived")) {
-          queryParams.favorite = "";
-          queryParams.archived = "true";
-          queryParams.folderId = "";
-          fetchNotes(queryParams);
-        } else if (location.pathname.startsWith("/trash")) {
-          queryParams.deleted = "true";
-          queryParams.folderId = "";
-          fetchNotes(queryParams);
-        } else if (folderId) {
-          queryParams.favorite = "";
-          fetchNotes(queryParams);
-        }
-        fetchNotes(queryParams);
-        toast.success("Changes Saved");
-      }, 500);
-    });
+    handleDataChange(event);
   }
 
   return (
@@ -83,14 +47,16 @@ function Menu({ optionsOpen, setOptionsOpen, noteData }) {
         >
           <button
             className="flex gap-3 hover:opacity-80"
-            onClick={() => handleMenu("favorite")}
+            name="isFavorite"
+            onClick={handleMenu}
           >
             <img src={favorite} className="color-white" alt="Favorite" />
             {noteData.isFavorite ? "Unfavorite" : "Add to favorites"}
           </button>
           <button
             className="flex gap-3 hover:opacity-80"
-            onClick={() => handleMenu("archive")}
+            name="isArchived"
+            onClick={handleMenu}
           >
             <img src={archive} alt="Archive" />
             {noteData.isArchived ? "Unarchive" : "Add to archive"}
@@ -98,7 +64,8 @@ function Menu({ optionsOpen, setOptionsOpen, noteData }) {
           <hr className="text-dark-10" />
           <button
             className="flex gap-3 hover:opacity-80"
-            onClick={() => handleMenu("delete")}
+            name="delete"
+            onClick={handleMenu}
           >
             <img src={trash} alt="Trash" />
             Delete
