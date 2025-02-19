@@ -1,1 +1,1 @@
-# Notes_App
+This is a Notes Taking application
