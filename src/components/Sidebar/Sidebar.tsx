@@ -13,31 +13,22 @@ import FoldersList from "./FoldersList/FoldersList";
 import RecentsList from "./RecentsList/RecentsList";
 import { useNotes } from "../../context/NotesContext";
 import SearchBar from "./SearchBar/SearchBar";
-
-interface RecentNote {
-  id: string;
-  title: string;
-  content: string;
-  isFavorite: boolean;
-  isArchived: boolean;
-  folderId: string;
-}
+import { Note} from "../../utils/interfaces"
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
 });
 
 function Sidebar() {
-  const { activeFolder, fetchFolders, isLoading } = useFolderContext();
-  const { setActiveFolderName } = useFolderContext();
+  const { activeFolder, fetchFolders, isLoading , setActiveFolderName }  = useFolderContext();
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState<boolean>(false);
-  const [recents, setRecents] = useState<RecentNote[]>([]);
+  const [recents, setRecents] = useState<Note[]>([]);
   const { fetchNotes } = useNotes();
 
   useEffect(() => {
     fetchFolders();
-    AxiosApi.get<{ recentNotes: RecentNote[] }>("/notes/recent").then((res: AxiosResponse<{ recentNotes: RecentNote[] }>) =>
+    AxiosApi.get<{ recentNotes: Note[] }>("/notes/recent").then((res: AxiosResponse<{ recentNotes: Note[] }>) =>
       setRecents(res.data.recentNotes)
     );
   }, []);

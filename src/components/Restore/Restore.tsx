@@ -9,9 +9,10 @@ const AxiosApi = axios.create({ baseURL:'https://nowted-server.remotestate.com' 
 function Restore() {
   const {noteId} = useParams();
   const navigate = useNavigate();
-  const [noteName , setNoteName] = useState();
+  const [noteName , setNoteName] = useState<string>("");
   function restoreNote() {
-    AxiosApi.post(`/notes/${noteId}/restore`).then(res => toast.success('Note Restored'));
+    AxiosApi.post(`/notes/${noteId}/restore`);
+    toast.success('Note Restored');
     navigate("/trash");
   }
   useEffect(() => {

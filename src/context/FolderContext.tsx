@@ -1,26 +1,16 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Folder, FolderContextType } from "../utils/interfaces";
 
-interface Folder {
-  id: string;
-  name: string;
-}
-
-const AxiosApi = axios.create({ baseURL: 'https://nowted-server.remotestate.com' });
-
-interface FolderContextType {
-  folders: Folder[];
-  activeFolder: string | null;
-  setActiveFolder: (id: string) => void;
-  folderName: string | undefined;
-  setActiveFolderName: (name: string) => void;
-  fetchFolders: () => void;
-  isLoading: boolean;
-}
+const AxiosApi = axios.create({
+  baseURL: "https://nowted-server.remotestate.com",
+});
 
 const FolderContext = createContext<FolderContextType | undefined>(undefined);
 
-export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
   const [folderName, setActiveFolderName] = useState<string>();
@@ -28,17 +18,16 @@ export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const fetchFolders = () => {
     setIsLoading(true);
-    AxiosApi
-      .get("/folders")
+    AxiosApi.get("/folders")
       .then((res) => {
-        const fetchedFolders = res.data.folders;
+        const fetchedFolders: Folder[] = res.data.folders;
         setFolders(fetchedFolders);
-        if (!activeFolder) {
+        if (!activeFolder && fetchedFolders.length > 0) {
           setActiveFolder(fetchedFolders[0].id);
-          setActiveFolderName(fetchedFolders[0].name); 
+          setActiveFolderName(fetchedFolders[0].name);
         }
       })
-      .then(() => setIsLoading(false));
+      .finally(() => setIsLoading(false));
   };
 
   useEffect(() => {
@@ -46,15 +35,15 @@ export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   return (
-    <FolderContext.Provider 
-      value={{ 
-        folders, 
-        activeFolder, 
-        setActiveFolder, 
-        folderName, 
-        setActiveFolderName, 
-        fetchFolders, 
-        isLoading 
+    <FolderContext.Provider
+      value={{
+        folders,
+        activeFolder,
+        setActiveFolder,
+        folderName,
+        setActiveFolderName,
+        fetchFolders,
+        isLoading,
       }}
     >
       {children}
@@ -64,5 +53,8 @@ export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
 export const useFolderContext = () => {
   const context = useContext(FolderContext);
+  if (!context) {
+    throw new Error("useFolderContext must be used within a FolderProvider");
+  }
   return context;
 };

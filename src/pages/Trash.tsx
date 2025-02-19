@@ -1,6 +1,6 @@
 import Restore from "../components/Restore/Restore";
 import { useParams } from "react-router-dom";
-import NotesSelect from "../components/NotesSelect/NotesSelect";
+import NotesSelect from "../components/NoNotesSelect/NoNotesSelect";
 import NotesList from "../components/NotesList/NotesList";
 
 function Trash() {

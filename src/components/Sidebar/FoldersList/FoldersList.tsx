@@ -12,7 +12,7 @@ const AxiosApi = axios.create({
 });
 
 function FoldersList({}) {
-  const { folders, setActiveFolder, fetchFolders, setActiveFolderName } =useFolderContext();
+  const { folders, setActiveFolder, fetchFolders, setActiveFolderName } = useFolderContext();
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [editedFolderName, setEditedFolderName] = useState<string>("");
 
@@ -27,7 +27,7 @@ function FoldersList({}) {
     setEditedFolderName(currentName);
   };
 
-  const saveFolderName = async (folderId) => {
+  const saveFolderName = async (folderId : string) => {
     try {
       await AxiosApi.patch(`/folders/${folderId}`, { name: editedFolderName });
       fetchFolders();
@@ -38,9 +38,8 @@ function FoldersList({}) {
   };
 
   const deleteFolder = (id: string) => {
-    AxiosApi.delete(`/folders/${id}`).then((res) => {
-      fetchFolders();
-    });
+    AxiosApi.delete(`/folders/${id}`)
+    fetchFolders();
   };
 
   return (
