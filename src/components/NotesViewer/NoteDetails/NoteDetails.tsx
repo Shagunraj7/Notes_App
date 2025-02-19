@@ -2,7 +2,7 @@ import date from "../../../assets/date.svg";
 import option from "../../../assets/option.svg";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import getDate from "../../../context/getDate";
+import getDate from "../../../utils/getDate";
 import Menu from "../Menu/Menu";
 import FolderDetails from "./FolderDetails/FolderDetails";
 import { NoteData } from "../../../utils/interfaces";

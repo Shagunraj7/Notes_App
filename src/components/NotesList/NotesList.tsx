@@ -3,7 +3,7 @@ import { useNotes } from "../../context/NotesContext";
 import { useEffect, useState } from "react";
 import Shimmer from "./Shimmer";
 import { useFolderContext } from "../../context/FolderContext";
-import getDate from "../../context/getDate";
+import getDate from "../../utils/getDate";
 import { FetchNotesParams } from "../../utils/interfaces";
 
 function NotesList() {
