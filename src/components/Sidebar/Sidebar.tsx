@@ -33,17 +33,16 @@ function Sidebar() {
     );
   }, []);
 
-  function addNewNote() {
-    AxiosApi.post<{ id: string }>(`/notes`, {
+  async function addNewNote() {
+    const res : AxiosResponse<{ id: string }> = await AxiosApi.post<{ id: string }>(`/notes`, {
       folderId: activeFolder,
       title: "New Note",
       content: "",
       isFavorite: false,
       isArchived: false,
-    }).then((res: AxiosResponse<{ id: string }>) => {
+    });
       fetchNotes({ folderId: activeFolder });
       navigate(`/folders/${activeFolder}/notes/${res.data.id}`);
-    });
   }
 
   return (
