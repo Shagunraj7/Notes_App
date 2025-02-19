@@ -3,7 +3,8 @@ import { useNotes } from "../../context/NotesContext";
 import { useEffect, useState } from "react";
 import Shimmer from "./Shimmer";
 import { useFolderContext } from "../../context/FolderContext";
-import getDate from "../../context/getDate";
+import getDate from "../../utils/getDate";
+import { FetchNotesParams } from "../../utils/interfaces";
 
 function NotesList() {
   const { notes, isLoading, fetchNotes } = useNotes();
@@ -17,31 +18,31 @@ function NotesList() {
   }, [folderId]);
 
   useEffect(() => {
-    const queryParams = {
-      archived: "false",
-      favorite: "false",
-      deleted: "false",
+    const queryParams :FetchNotesParams = {
+      archived: false,
+      favorite: false,
+      deleted: false,
       page: currentPage,
       folderId,
     };
     if (location.pathname.startsWith("/favorites")) {
-      queryParams.folderId = "";
-      queryParams.favorite = "true";
+      queryParams.folderId = undefined;
+      queryParams.favorite = true;
       setRoute("/favorites");
       fetchNotes(queryParams);
     } else if (location.pathname.startsWith("/archived")) {
       setRoute("/archived");
-      queryParams.favorite = "";
-      queryParams.archived = "true";
+      queryParams.favorite = undefined;
+      queryParams.archived = true;
       queryParams.folderId = "";
       fetchNotes(queryParams);
     } else if (location.pathname.startsWith("/trash")) {
       setRoute("/trash");
-      queryParams.deleted = "true";
+      queryParams.deleted = true;
       queryParams.folderId = "";
       fetchNotes(queryParams);
     } else if (folderId) {
-      queryParams.favorite = "";
+      queryParams.favorite = undefined;
       fetchNotes(queryParams);
     }
   }, [folderId, currentPage]);

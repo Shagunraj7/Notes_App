@@ -2,24 +2,19 @@ import date from "../../../assets/date.svg";
 import option from "../../../assets/option.svg";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import getDate from "../../../context/getDate";
+import getDate from "../../../utils/getDate";
 import Menu from "../Menu/Menu";
 import FolderDetails from "./FolderDetails/FolderDetails";
+import { NoteData } from "../../../utils/interfaces";
 
-interface NoteData {
-  title: string;
-  content: string;
-  createdAt?: string;
-  isFavorite: boolean;
-  isArchived: boolean;
-  folder?: {
-    name: string;
-  };
+interface NoteDetailsProps {
+  noteData: NoteData;
+  handleDataChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> | React.MouseEvent<HTMLButtonElement>) => void;
+  folderChange: boolean;
+  setFolderChange: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-
-function NoteDetails({ noteData, handleDataChange , folderChange , setFolderChange}) {
-  
+function NoteDetails({ noteData, handleDataChange, folderChange, setFolderChange }: NoteDetailsProps) {
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const { noteId} = useParams<{
     noteId: string;

@@ -1,59 +1,66 @@
-import { createContext, useContext, useState } from "react";
-import axios from "axios";
+import { createContext, useContext, useState, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { toast } from "react-toastify";
+import { Note , NotesContextType , FetchNotesParams } from "../utils/interfaces";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
 });
-const NotesContext = createContext<any>(null);
 
-export function NotesProvider({ children }: { children: React.ReactNode }) {
-  const [notes, setNotes] = useState([]);
-  const [isLoading, setLoading] = useState(false);
+const NotesContext = createContext<NotesContextType | null>(null);
+
+export function NotesProvider({ children }: { children: ReactNode }) {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [isLoading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const fetchNotes = async ({
     folderId = "",
     page = 1,
-    archived = "false",
-    favorite = "false",
-    deleted = "false",
+    archived = false,
+    favorite = false,
+    deleted = false,
     search = "",
-  }) => {
+  }: FetchNotesParams): Promise<void> => {
     setLoading(true);
-    AxiosApi.get(`/notes`, {
-      params: {
-        archived,
-        favorite,
-        deleted,
-        folderId,
-        page,
-        limit: 10,
-        search,
-      },
-    })
-    .then((response) => {
+    try {
+      const response = await AxiosApi.get<{ notes: Note[] }>("/notes", {
+        params: {
+          archived,
+          favorite,
+          deleted,
+          folderId,
+          page,
+          limit: 10,
+          search,
+        },
+      });
+
       if (page === 1) {
         setNotes(response.data.notes);
       } else {
         setNotes((prevNotes) => [...prevNotes, ...response.data.notes]);
       }
-    })
-    .then((res) => setLoading(false))
-    .catch((err) => {
-      toast.error('Invalid Path');
-      navigate('/');
-    })
+    } catch (error) {
+      toast.error("Invalid Path");
+      navigate("/");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <NotesContext.Provider value={{ notes, setNotes, fetchNotes, isLoading , setLoading}}>
+    <NotesContext.Provider value={{ notes, setNotes, fetchNotes, isLoading, setLoading }}>
       {children}
     </NotesContext.Provider>
   );
 }
 
-export function useNotes() {
-  return useContext(NotesContext);
+export function useNotes(): NotesContextType {
+  const context = useContext(NotesContext);
+  if (!context) {
+    throw new Error("useNotes must be used within a NotesProvider");
+  }
+  return context;
 }

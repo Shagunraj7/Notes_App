@@ -1,6 +1,6 @@
 import NotesList from "../components/NotesList/NotesList"
 import NotesViewer from "../components/NotesViewer/NotesViewer"
-import NotesSelect from "../components/NotesSelect/NotesSelect";
+import NotesSelect from "../components/NoNotesSelect/NoNotesSelect";
 import { useParams } from "react-router-dom";
 
 function Archived() {

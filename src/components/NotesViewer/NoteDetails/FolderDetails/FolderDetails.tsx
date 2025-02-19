@@ -1,9 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useFolderContext } from "../../../../context/FolderContext";
 import folder from "../../../../assets/folder.svg";
 import { useParams } from "react-router-dom";
+import { NoteData } from "../../../../utils/interfaces";
 
-function FolderDetails({ handleDataChange , noteData , folderChange, setFolderChange}) {
+interface NoteDetailsProps {
+  noteData: NoteData;
+  handleDataChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.MouseEvent<HTMLButtonElement>) => void;
+  folderChange: boolean;
+  setFolderChange: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+
+function FolderDetails({ noteData, handleDataChange, folderChange, setFolderChange }: NoteDetailsProps) {
   const { folderName, folders } = useFolderContext();
   const folderRef = useRef<HTMLDivElement>(null);
   const { folderId } = useParams<{
@@ -24,7 +33,7 @@ function FolderDetails({ handleDataChange , noteData , folderChange, setFolderCh
     };
   }, []);
 
-  function callNoteDataChange(event) {
+  function callNoteDataChange(event: React.MouseEvent<HTMLButtonElement>) {
     handleDataChange(event);
     setFolderChange(false);
   }

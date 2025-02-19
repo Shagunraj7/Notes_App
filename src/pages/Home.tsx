@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import NotesList from "../components/NotesList/NotesList";
-import NotesSelect from "../components/NotesSelect/NotesSelect";
+import NotesSelect from "../components/NoNotesSelect/NoNotesSelect";
 import NotesViewer from "../components/NotesViewer/NotesViewer";
 
 function Home() {

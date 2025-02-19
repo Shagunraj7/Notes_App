@@ -3,19 +3,24 @@ import trash from "../../../assets/trash.svg";
 import favorite from "../../../assets/favorite.svg";
 import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useNotes } from "../../../context/NotesContext";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { NoteData } from "../../../utils/interfaces";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
 });
 
-function Menu({ optionsOpen, setOptionsOpen, noteData , handleDataChange}) {
+interface MenuProps {
+  optionsOpen: boolean;
+  setOptionsOpen: (open: boolean) => void;
+  noteData: NoteData;
+  handleDataChange: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+function Menu({ optionsOpen, setOptionsOpen, noteData, handleDataChange }: MenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
-  const { fetchNotes } = useNotes();
   const navigate = useNavigate();
-  const { folderId , noteId} = useParams();
+  const { noteId } = useParams<{ noteId: string }>();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -28,13 +33,17 @@ function Menu({ optionsOpen, setOptionsOpen, noteData , handleDataChange}) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [optionsOpen]);
+  }, [optionsOpen, setOptionsOpen]);
 
-  function handleMenu(event) {
-    if (event.target.name == "delete") {
-      AxiosApi.delete(`/notes/${noteId}`);
-      setTimeout(() => navigate(`/trash/${noteId}`), 100);
+  function handleMenu(event: React.MouseEvent<HTMLButtonElement>) {
+    const { name } = event.currentTarget; 
+
+    if (name === "delete") {
+      AxiosApi.delete(`/notes/${noteId}`).then(() => {
+        setTimeout(() => navigate(`/trash/${noteId}`), 100);
+      });
     }
+
     handleDataChange(event);
   }
 

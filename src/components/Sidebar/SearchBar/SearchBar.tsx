@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import debounce from "lodash.debounce";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { Note } from "../../../utils/interfaces";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
@@ -9,7 +10,7 @@ const AxiosApi = axios.create({
 
 function SearchBar() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState<Note[]>([]);
 
   const saveNote = useCallback(
     debounce((query: string) => {
