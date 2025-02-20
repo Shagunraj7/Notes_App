@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import getDate from "../../../utils/getDate";
 import Menu from "../Menu/Menu";
 import FolderDetails from "./FolderDetails/FolderDetails";
-import { NoteData } from "../../../utils/interfaces";
+import { NoteData } from "../../../api.types";
 
 interface NoteDetailsProps {
   noteData: NoteData;

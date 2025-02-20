@@ -4,48 +4,23 @@ import { useEffect, useState } from "react";
 import Shimmer from "./Shimmer";
 import { useFolderContext } from "../../context/FolderContext";
 import getDate from "../../utils/getDate";
-import { FetchNotesParams } from "../../utils/interfaces";
+import {  Note } from "../../api.types";
+import { getQueryparams } from "../../utils/getQueryParams";
 
-function NotesList() {
+function NotesList({ sectionTitle }: { sectionTitle?: string }) {
   const { notes, isLoading, fetchNotes } = useNotes();
   const [currentPage, setCurrentPage] = useState(1);
-  const { folderName } = useFolderContext();
+  const { activeFolder  } = useFolderContext();
   const { folderId } = useParams();
-  const [route, setRoute] = useState("");
 
   useEffect(() => {
     setCurrentPage(1);
   }, [folderId]);
 
   useEffect(() => {
-    const queryParams :FetchNotesParams = {
-      archived: false,
-      favorite: false,
-      deleted: false,
-      page: currentPage,
-      folderId,
-    };
-    if (location.pathname.startsWith("/favorites")) {
-      queryParams.folderId = undefined;
-      queryParams.favorite = true;
-      setRoute("/favorites");
-      fetchNotes(queryParams);
-    } else if (location.pathname.startsWith("/archived")) {
-      setRoute("/archived");
-      queryParams.favorite = undefined;
-      queryParams.archived = true;
-      queryParams.folderId = "";
-      fetchNotes(queryParams);
-    } else if (location.pathname.startsWith("/trash")) {
-      setRoute("/trash");
-      queryParams.deleted = true;
-      queryParams.folderId = "";
-      fetchNotes(queryParams);
-    } else if (folderId) {
-      queryParams.favorite = undefined;
-      fetchNotes(queryParams);
-    }
-  }, [folderId, currentPage]);
+    const queryParams = getQueryparams(currentPage, folderId);
+    fetchNotes(queryParams);
+  }, [folderId, currentPage, fetchNotes]);
 
   return (
     <>
@@ -54,21 +29,21 @@ function NotesList() {
           <Shimmer />
         ) : (
           <div>
-            <div className="w-81 text-xl semi-bold pb-2">{folderName}</div>
+            <div className="w-81 text-xl semi-bold pb-2">
+              {sectionTitle ? sectionTitle : activeFolder ? activeFolder.name : "No Folder Selected"}
+            </div>
             <div className="w-full h-[90vh] overflow-auto flex flex-col gap-4">
-              {notes.map((note: any, index: number) => (
+              {notes.map((note: Note, index: number) => (
                 <NavLink
                   to={
-                    folderId
-                      ? `/folders/${note.folderId}/notes/${note.id}`
-                      : `${route}/${note.id}`
+                    sectionTitle
+                      ? `/${sectionTitle.toLocaleLowerCase()}/${note.id}`
+                      : `/folders/${note.folderId}/notes/${note.id}`
                   }
                   key={index}
                   className={({ isActive }) =>
                     `p-5 flex flex-col gap-4 ${
-                      isActive
-                        ? "bg-dark-2 pointer-events-none"
-                        : "bg-dark-1"
+                      isActive ? "bg-dark-2 pointer-events-none" : "bg-dark-1"
                     }`
                   }
                 >

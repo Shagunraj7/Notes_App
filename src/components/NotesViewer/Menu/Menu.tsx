@@ -1,10 +1,10 @@
 import archive from "../../../assets/archive.svg";
 import trash from "../../../assets/trash.svg";
 import favorite from "../../../assets/favorite.svg";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { NoteData } from "../../../utils/interfaces";
+import { NoteData } from "../../../api.types";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
@@ -35,7 +35,7 @@ function Menu({ optionsOpen, setOptionsOpen, noteData, handleDataChange }: MenuP
     };
   }, [optionsOpen, setOptionsOpen]);
 
-  function handleMenu(event: React.MouseEvent<HTMLButtonElement>) {
+  const handleMenu = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     const { name } = event.currentTarget; 
 
     if (name === "delete") {
@@ -45,7 +45,7 @@ function Menu({ optionsOpen, setOptionsOpen, noteData, handleDataChange }: MenuP
     }
 
     handleDataChange(event);
-  }
+  },[handleDataChange, navigate, noteId]);
 
   return (
     <>

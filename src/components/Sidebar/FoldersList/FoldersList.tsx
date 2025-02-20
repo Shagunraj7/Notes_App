@@ -2,32 +2,32 @@ import addFolderIcon from "../../../assets/folderLogo.svg";
 import folder from "../../../assets/folder.svg";
 import trash from "../../../assets/trash.svg";
 import openFolder from "../../../assets/openFolder.svg";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useFolderContext } from "../../../context/FolderContext";
 import { NavLink } from "react-router-dom";
 import axios from "axios";
+import {  Folder } from "../../../api.types";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
 });
 
-function FoldersList({}) {
-  const { folders, setActiveFolder, fetchFolders, setActiveFolderName } = useFolderContext();
+function FoldersList() {
+  const { folders,  fetchFolders } = useFolderContext();
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [editedFolderName, setEditedFolderName] = useState<string>("");
 
-  function addNewFolder() {
-    AxiosApi.post("/folders", { name: "New Folder" });
-    setTimeout(() => {
+  const addNewFolder = useCallback(async () =>  {
+    await AxiosApi.post("/folders", { name: "New Folder" });
       fetchFolders();
-    }, 500);
-  }
-  const handleEditFolder = (folderId : string, currentName: string) => {
+  },[fetchFolders]);
+
+  const handleEditFolder = (folderId: string, currentName: string) => {
     setEditingFolderId(folderId);
     setEditedFolderName(currentName);
   };
 
-  const saveFolderName = async (folderId : string) => {
+  const saveFolderName = async (folderId: string) => {
     try {
       await AxiosApi.patch(`/folders/${folderId}`, { name: editedFolderName });
       fetchFolders();
@@ -38,7 +38,7 @@ function FoldersList({}) {
   };
 
   const deleteFolder = (id: string) => {
-    AxiosApi.delete(`/folders/${id}`)
+    AxiosApi.delete(`/folders/${id}`);
     fetchFolders();
   };
 
@@ -56,14 +56,10 @@ function FoldersList({}) {
         </div>
         <div className="max-h-90 overflow-auto">
           {folders &&
-            folders.map((item: any, index: number) => (
+            folders.map((item: Folder, index: number) => (
               <NavLink
                 to={`/folders/${item.id}`}
                 className={({ isActive }) => {
-                  if (isActive) {
-                    setActiveFolder(item.id);
-                    setActiveFolderName(item.name);
-                  }
                   return `hover:bg-dark-1 pl-5 p-3 flex gap-4 ${
                     isActive ? "text-white bg-dark-2" : ""
                   }`;

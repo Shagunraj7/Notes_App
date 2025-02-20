@@ -7,7 +7,7 @@ function Archived() {
   const { noteId } = useParams();
   return (
     <div className="flex">
-      <NotesList />
+      <NotesList sectionTitle="Archived"/>
       {!noteId ? <NotesSelect/> : <NotesViewer /> }
     </div>
   )

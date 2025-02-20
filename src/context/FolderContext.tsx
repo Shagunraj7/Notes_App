@@ -1,6 +1,15 @@
-import axios from "axios";
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { Folder, FolderContextType } from "../utils/interfaces";
+import axios, { isAxiosError } from "axios";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { Folder, FolderContextType } from "../api.types";
+import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
@@ -11,37 +20,41 @@ const FolderContext = createContext<FolderContextType | undefined>(undefined);
 export const FolderProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const { folderId } = useParams();
   const [folders, setFolders] = useState<Folder[]>([]);
-  const [activeFolder, setActiveFolder] = useState<string | null>(null);
-  const [folderName, setActiveFolderName] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  
 
-  const fetchFolders = () => {
-    setIsLoading(true);
-    AxiosApi.get("/folders")
-      .then((res) => {
-        const fetchedFolders: Folder[] = res.data.folders;
-        setFolders(fetchedFolders);
-        if (!activeFolder && fetchedFolders.length > 0) {
-          setActiveFolder(fetchedFolders[0].id);
-          setActiveFolderName(fetchedFolders[0].name);
-        }
-      })
-      .finally(() => setIsLoading(false));
-  };
-
-  useEffect(() => {
-    fetchFolders();
+  const fetchFolders = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await AxiosApi.get<{ folders: Folder[] }>("/folders");
+      setFolders(data.folders);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data.message);
+      } else {
+        toast.error("somthing went wrong!");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    if (folders.length) return;
+    fetchFolders();
+  }, [fetchFolders, folders.length]);
+
+  const activeFolder = useMemo(() => {
+    return folders.find((item) => item.id == folderId) ?? null;
+  }, [folderId, folders]);
+  
   return (
     <FolderContext.Provider
       value={{
         folders,
         activeFolder,
-        setActiveFolder,
-        folderName,
-        setActiveFolderName,
         fetchFolders,
         isLoading,
       }}

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import debounce from "lodash.debounce";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { Note } from "../../../utils/interfaces";
+import { Note } from "../../../api.types";
+import { useDebounce } from "../../../hooks/use-debounce-value";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
@@ -11,29 +11,28 @@ const AxiosApi = axios.create({
 function SearchBar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [notes, setNotes] = useState<Note[]>([]);
+  const debouncedSearchValue = useDebounce(searchQuery, 400);
 
-  const saveNote = useCallback(
-    debounce((query: string) => {
-      AxiosApi.get(`/notes`, {
-        params: {
-          deleted: "false",
-          page: 1,
-          limit: 10,
-          search: query,
-        },
-      }).then((res) => {
-        setNotes(res.data.notes);
-      });
-    }, 500),
-    [searchQuery]
-  );
-  useEffect(() => {
-    if (searchQuery.trim() !== "") {
-      saveNote(searchQuery);
-    } else {
+  const searchNotes = useCallback(() => {
+    if (!debouncedSearchValue) {
       setNotes([]);
+      return;
     }
-  }, [searchQuery]);
+    AxiosApi.get(`/notes`, {
+      params: {
+        deleted: "false",
+        page: 1,
+        limit: 10,
+        search: debouncedSearchValue,
+      },
+    }).then((res) => {
+      setNotes(res.data.notes);
+    });
+  }, [debouncedSearchValue]);
+
+  useEffect(() => {
+    searchNotes();
+  }, [searchNotes]);
 
   return (
     <>

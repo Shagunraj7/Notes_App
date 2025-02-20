@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
 import logo from "../../assets/logo.svg";
 import search from "../../assets/search.svg";
 import favorite from "../../assets/favorite.svg";
@@ -13,37 +13,45 @@ import FoldersList from "./FoldersList/FoldersList";
 import RecentsList from "./RecentsList/RecentsList";
 import { useNotes } from "../../context/NotesContext";
 import SearchBar from "./SearchBar/SearchBar";
-import { Note} from "../../utils/interfaces"
+import {  Note } from "../../api.types";
+import { toast } from "react-toastify";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
 });
 
 function Sidebar() {
-  const { activeFolder, fetchFolders, isLoading , setActiveFolderName }  = useFolderContext();
   const navigate = useNavigate();
+  const {folderId} = useParams();
+  const { fetchNotes } = useNotes();
+  const { isLoading} = useFolderContext();
   const [searchOpen, setSearchOpen] = useState<boolean>(false);
   const [recents, setRecents] = useState<Note[]>([]);
-  const { fetchNotes } = useNotes();
 
   useEffect(() => {
-    fetchFolders();
-    AxiosApi.get<{ recentNotes: Note[] }>("/notes/recent").then((res: AxiosResponse<{ recentNotes: Note[] }>) =>
-      setRecents(res.data.recentNotes)
+    AxiosApi.get<{ recentNotes: Note[] }>("/notes/recent").then(
+      (res: AxiosResponse<{ recentNotes: Note[] }>) =>
+        setRecents(res.data.recentNotes)
     );
-  }, []);
+  },[folderId]);
 
-  async function addNewNote() {
-    const res : AxiosResponse<{ id: string }> = await AxiosApi.post<{ id: string }>(`/notes`, {
-      folderId: activeFolder,
+  const addNewNote = useCallback(async () => {
+    if(!folderId) {
+      toast.error("Please Select a Folder");
+      return;
+    }
+    const res: AxiosResponse<{ id: string }> = await AxiosApi.post<{
+      id: string;
+    }>(`/notes`, {
+      folderId,
       title: "New Note",
       content: "",
       isFavorite: false,
       isArchived: false,
     });
-      fetchNotes({ folderId: activeFolder });
-      navigate(`/folders/${activeFolder}/notes/${res.data.id}`);
-  }
+    fetchNotes({ folderId });
+    navigate(`/folders/${folderId}/notes/${res.data.id}`);
+  },[fetchNotes, folderId, navigate]);
 
   return (
     <div className="flex">
@@ -85,14 +93,11 @@ function Sidebar() {
               <p className="text-xs text-gray-400 pl-5 pb-2">More</p>
               <NavLink
                 to={`/favorites`}
-                className={({ isActive }) => {
-                  if (isActive) setActiveFolderName("Favorites");
-                  return `pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive
-                      ? "text-white bg-netflix"
-                      : "hover:bg-dark-0"
-                  }`;
-                }}
+                className={({ isActive }) =>
+                  `pl-5 pt-3 pb-3 flex gap-4 ${
+                    isActive ? "text-white bg-netflix" : "hover:bg-dark-0"
+                  }`
+                }
               >
                 <img src={favorite} alt="" />
                 Favorites
@@ -100,11 +105,8 @@ function Sidebar() {
               <NavLink
                 to={`/trash`}
                 className={({ isActive }) => {
-                  if (isActive) setActiveFolderName("Trash");
                   return ` pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive
-                      ? "text-white bg-netflix"
-                      : "hover:bg-dark-0"
+                    isActive ? "text-white bg-netflix" : "hover:bg-dark-0"
                   }`;
                 }}
               >
@@ -114,11 +116,8 @@ function Sidebar() {
               <NavLink
                 to={`/archived`}
                 className={({ isActive }) => {
-                  if (isActive) setActiveFolderName("Archived");
                   return `pl-5 pt-3 pb-3 flex gap-4 ${
-                    isActive
-                      ? "text-white bg-netflix"
-                      : "hover:bg-dark-0"
+                    isActive ? "text-white bg-netflix" : "hover:bg-dark-0"
                   }`;
                 }}
               >
