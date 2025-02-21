@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import NoteDetails from "./NoteDetails/NoteDetails";
-import debounce from "lodash.debounce";
 import { NoteData } from "../../api.types";
+import { useDebounce } from "../../hooks/use-debounce-value";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
@@ -34,6 +34,43 @@ function NotesViewer() {
   const { noteId, folderId } = useParams();
   const navigate = useNavigate();
 
+  const debouncedNote = useDebounce(noteData, 400);
+
+  const saveNote = useCallback(async () => {
+    if (!debouncedNote) {
+      setNoteData(initialData);
+      return;
+    }
+    const arr = {
+      folderId: noteData.folderId,
+      title: noteData.title,
+      content: noteData.content,
+      isFavorite: noteData.isFavorite,
+      isArchived: noteData.isArchived,
+    };
+
+    await AxiosApi.patch(`/notes/${noteId}`, arr);
+
+    if (noteData.folderId && folderId && noteData.folderId !== folderId) {
+      setFolderChange(false);
+      navigate(`/folders/${noteData.folderId}/notes/${noteId}`);
+    }
+  }, [
+    debouncedNote,
+    folderId,
+    navigate,
+    noteData.content,
+    noteData.folderId,
+    noteData.isArchived,
+    noteData.isFavorite,
+    noteData.title,
+    noteId,
+  ]);
+
+  useEffect(() => {
+    saveNote();
+  }, [saveNote]);
+
   useEffect(() => {
     const fetchNote = async () => {
       if (!noteId || noteId === "newNote") {
@@ -47,45 +84,24 @@ function NotesViewer() {
         console.error("Error fetching note:", error);
       }
     };
-  
+
     fetchNote();
   }, [navigate, noteId]);
-  
 
-const handleSaveNote = useMemo(
-  () =>
-    debounce(async (noteData, noteId, folderId, setFolderChange, navigate) => {
-      const arr = {
-        folderId: noteData.folderId,
-        title: noteData.title,
-        content: noteData.content,
-        isFavorite: noteData.isFavorite,
-        isArchived: noteData.isArchived,
-      };
-
-      await AxiosApi.patch(`/notes/${noteId}`, arr);
-
-      if (noteData.folderId && folderId && noteData.folderId !== folderId) {
-        setFolderChange(false);
-        navigate(`/folders/${noteData.folderId}/notes/${noteId}`);
-      }
-    }, 500),
-  []
-);
-
-const saveNote = useCallback(() => {
-  handleSaveNote(noteData, noteId, folderId, setFolderChange, navigate);
-}, [handleSaveNote, noteData, noteId, folderId, navigate]);
-
-  useEffect(() => {
-    saveNote();
-  }, [noteData, saveNote]);
-  
-  const handleDataChange = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> | 
-    React.MouseEvent<HTMLButtonElement>) => {
-      const target = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+  const handleDataChange = useCallback(
+    (
+      event:
+        | React.ChangeEvent<
+            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+          >
+        | React.MouseEvent<HTMLButtonElement>
+    ) => {
+      const target = event.target as
+        | HTMLInputElement
+        | HTMLTextAreaElement
+        | HTMLSelectElement;
       const name = target.name;
-    
+
       if (name === "isFavorite" || name === "isArchived") {
         setNoteData((prevData) => ({
           ...prevData,
@@ -93,20 +109,22 @@ const saveNote = useCallback(() => {
         }));
         return;
       }
-    
+
       let value: string | undefined;
-    
+
       if (name === "folderId" && "dataset" in event.currentTarget) {
         value = event.currentTarget.dataset.id;
       } else {
         value = target.value;
       }
-    
+
       setNoteData((prevData) => ({
         ...prevData,
         [name]: value,
       }));
-  },[]);
+    },
+    []
+  );
 
   return (
     <div className="w-full p-12">
@@ -133,4 +151,4 @@ const saveNote = useCallback(() => {
 
 export default NotesViewer;
 
-<NotesViewer/>
+<NotesViewer />;
