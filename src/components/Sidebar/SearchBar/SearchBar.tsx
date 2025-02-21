@@ -13,21 +13,20 @@ function SearchBar() {
   const [notes, setNotes] = useState<Note[]>([]);
   const debouncedSearchValue = useDebounce(searchQuery, 400);
 
-  const searchNotes = useCallback(() => {
+  const searchNotes = useCallback(async () => {
     if (!debouncedSearchValue) {
       setNotes([]);
       return;
     }
-    AxiosApi.get(`/notes`, {
+    const res = await AxiosApi.get(`/notes`, {
       params: {
         deleted: "false",
         page: 1,
         limit: 10,
         search: debouncedSearchValue,
       },
-    }).then((res) => {
-      setNotes(res.data.notes);
     });
+    setNotes(res.data.notes);
   }, [debouncedSearchValue]);
 
   useEffect(() => {

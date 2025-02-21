@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import NoteDetails from "./NoteDetails/NoteDetails";
 import debounce from "lodash.debounce";
 import { NoteData } from "../../api.types";
@@ -36,16 +35,22 @@ function NotesViewer() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!noteId || noteId === "newNote") {
-      setNoteData(initialData);
-      return;
-    }
-    AxiosApi.get(`/notes/${noteId}`)
-      .then((res) => setNoteData(res.data.note))
-      .catch(() => {
-        toast.error("Invalid Path");
-      });
+    const fetchNote = async () => {
+      if (!noteId || noteId === "newNote") {
+        setNoteData(initialData);
+        return;
+      }
+      try {
+        const response = await AxiosApi.get(`/notes/${noteId}`);
+        setNoteData(response.data.note);
+      } catch (error) {
+        console.error("Error fetching note:", error);
+      }
+    };
+  
+    fetchNote();
   }, [navigate, noteId]);
+  
 
 const handleSaveNote = useMemo(
   () =>
@@ -129,12 +134,3 @@ const saveNote = useCallback(() => {
 export default NotesViewer;
 
 <NotesViewer/>
-
-
-
-// note View
-
-// note select view
-
-// note restore view 
-

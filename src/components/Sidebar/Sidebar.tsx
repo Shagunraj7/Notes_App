@@ -29,10 +29,11 @@ function Sidebar() {
   const [recents, setRecents] = useState<Note[]>([]);
 
   useEffect(() => {
-    AxiosApi.get<{ recentNotes: Note[] }>("/notes/recent").then(
-      (res: AxiosResponse<{ recentNotes: Note[] }>) =>
-        setRecents(res.data.recentNotes)
-    );
+    async function fetchRecentNotes() {
+      const res: AxiosResponse<{ recentNotes: Note[] }> = await AxiosApi.get<{ recentNotes: Note[] }>("/notes/recent");
+      setRecents(res.data.recentNotes)
+    }
+    fetchRecentNotes();
   },[folderId]);
 
   const addNewNote = useCallback(async () => {

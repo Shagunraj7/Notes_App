@@ -35,13 +35,12 @@ function Menu({ optionsOpen, setOptionsOpen, noteData, handleDataChange }: MenuP
     };
   }, [optionsOpen, setOptionsOpen]);
 
-  const handleMenu = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMenu = useCallback(async (event: React.MouseEvent<HTMLButtonElement>) => {
     const { name } = event.currentTarget; 
 
     if (name === "delete") {
-      AxiosApi.delete(`/notes/${noteId}`).then(() => {
-        setTimeout(() => navigate(`/trash/${noteId}`), 100);
-      });
+      await AxiosApi.delete(`/notes/${noteId}`);
+      setTimeout(() => navigate(`/trash/${noteId}`), 100);
     }
 
     handleDataChange(event);

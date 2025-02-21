@@ -17,7 +17,11 @@ function Restore() {
   },[navigate, noteId]);
   
   useEffect(() => {
-    AxiosApi.get(`/notes/${noteId}`).then(res => setNoteName(res.data.note.title))
+    async function fetchNote() {
+      const res = await AxiosApi.get(`/notes/${noteId}`);
+      setNoteName(res.data.note.title);
+    }
+    fetchNote();
   },[noteId]);
   return (
     <>
