@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useFolderContext } from "../../../../context/FolderContext";
 import folder from "../../../../assets/folder.svg";
 import { useParams } from "react-router-dom";
-import { NoteData } from "../../../../utils/interfaces";
+import { Folder, NoteData } from "../../../../api.types";
 
 interface NoteDetailsProps {
   noteData: NoteData;
@@ -13,7 +13,7 @@ interface NoteDetailsProps {
 
 
 function FolderDetails({ noteData, handleDataChange, folderChange, setFolderChange }: NoteDetailsProps) {
-  const { folderName, folders } = useFolderContext();
+  const { activeFolder , folders } = useFolderContext();
   const folderRef = useRef<HTMLDivElement>(null);
   const { folderId } = useParams<{
     folderId: string;
@@ -31,7 +31,7 @@ function FolderDetails({ noteData, handleDataChange, folderChange, setFolderChan
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [setFolderChange]);
 
   function callNoteDataChange(event: React.MouseEvent<HTMLButtonElement>) {
     handleDataChange(event);
@@ -54,7 +54,7 @@ function FolderDetails({ noteData, handleDataChange, folderChange, setFolderChan
             <ul className="absolute max-h-100 w-80 bg-dark-5 overflow-auto rounded-md shadow-xl ">
               {folderChange &&
                 folders &&
-                folders.map((item: any, index: number) => (
+                folders.map((item: Folder, index: number) => (
                   <button
                     className={`hover:bg-dark-1 w-full pl-5 p-3 flex gap-4 shadow-2xl`}
                     key={index}
@@ -69,7 +69,7 @@ function FolderDetails({ noteData, handleDataChange, folderChange, setFolderChan
             </ul>
           </div>
         </div>
-        <p>{folderId ? folderName : noteData.folder?.name || ""}</p>
+        <p>{folderId ? activeFolder?.name : noteData.folder?.name || ""}</p>
       </div>
     </>
   );

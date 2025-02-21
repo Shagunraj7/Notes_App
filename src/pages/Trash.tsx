@@ -8,7 +8,7 @@ function Trash() {
 
   return (
     <div className="flex">
-      <NotesList />
+      <NotesList sectionTitle="Trash"/>
       {noteId ? <Restore /> : <NotesSelect/>}
     </div>
   );

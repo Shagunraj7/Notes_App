@@ -7,7 +7,7 @@ function Favorites() {
   const { noteId } = useParams();
   return (
     <div className="flex">
-      <NotesList />
+      <NotesList sectionTitle="Favorites" />
       { noteId ?<NotesViewer /> : <NotesSelect/>}
     </div>
   );

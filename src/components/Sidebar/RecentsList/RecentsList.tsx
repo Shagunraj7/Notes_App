@@ -1,9 +1,10 @@
 import { NavLink } from "react-router-dom";
 import document from "../../../assets/document.svg";
 import inactivedocument from "../../../assets/inactivedocument.svg";
+import { Note } from "../../../api.types";
 
 interface RecentsListProps {
-    recents: any[];
+    recents: Note[];
   }
 
 const RecentsList: React.FC<RecentsListProps> = ({ recents }) =>  {

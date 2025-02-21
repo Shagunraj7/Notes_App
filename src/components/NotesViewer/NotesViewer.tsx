@@ -1,10 +1,9 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import NoteDetails from "./NoteDetails/NoteDetails";
 import debounce from "lodash.debounce";
-import { NoteData } from "../../utils/interfaces";
+import { NoteData } from "../../api.types";
 
 const AxiosApi = axios.create({
   baseURL: "https://nowted-server.remotestate.com",
@@ -36,20 +35,26 @@ function NotesViewer() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!noteId || noteId === "newNote") {
-      setNoteData(initialData);
-      return;
-    }
-    AxiosApi.get(`/notes/${noteId}`)
-      .then((res) => setNoteData(res.data.note))
-      .catch(() => {
-        toast.error("Invalid Path");
-        navigate("/");
-      });
-  }, [noteId]);
+    const fetchNote = async () => {
+      if (!noteId || noteId === "newNote") {
+        setNoteData(initialData);
+        return;
+      }
+      try {
+        const response = await AxiosApi.get(`/notes/${noteId}`);
+        setNoteData(response.data.note);
+      } catch (error) {
+        console.error("Error fetching note:", error);
+      }
+    };
+  
+    fetchNote();
+  }, [navigate, noteId]);
+  
 
-  const saveNote = useCallback(
-    debounce(async () => {
+const handleSaveNote = useMemo(
+  () =>
+    debounce(async (noteData, noteId, folderId, setFolderChange, navigate) => {
       const arr = {
         folderId: noteData.folderId,
         title: noteData.title,
@@ -57,20 +62,27 @@ function NotesViewer() {
         isFavorite: noteData.isFavorite,
         isArchived: noteData.isArchived,
       };
-      AxiosApi.patch(`/notes/${noteId}`, arr).then(() => {
-        if (noteData.folderId && folderId && noteData.folderId !== folderId) {
-          setFolderChange(false);
-          navigate(`/folders/${noteData.folderId}/notes/${noteId}`);
-        }
-      });
+
+      await AxiosApi.patch(`/notes/${noteId}`, arr);
+
+      if (noteData.folderId && folderId && noteData.folderId !== folderId) {
+        setFolderChange(false);
+        navigate(`/folders/${noteData.folderId}/notes/${noteId}`);
+      }
     }, 500),
-    [noteData, noteId, folderId]
-  );
+  []
+);
+
+const saveNote = useCallback(() => {
+  handleSaveNote(noteData, noteId, folderId, setFolderChange, navigate);
+}, [handleSaveNote, noteData, noteId, folderId, navigate]);
+
   useEffect(() => {
     saveNote();
-  }, [noteData]);
-  function handleDataChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> | 
-    React.MouseEvent<HTMLButtonElement>) {
+  }, [noteData, saveNote]);
+  
+  const handleDataChange = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> | 
+    React.MouseEvent<HTMLButtonElement>) => {
       const target = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
       const name = target.name;
     
@@ -94,7 +106,7 @@ function NotesViewer() {
         ...prevData,
         [name]: value,
       }));
-  }
+  },[]);
 
   return (
     <div className="w-full p-12">
@@ -120,3 +132,5 @@ function NotesViewer() {
 }
 
 export default NotesViewer;
+
+<NotesViewer/>

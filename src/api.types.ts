@@ -8,10 +8,7 @@ export interface Folder {
 
 export interface FolderContextType {
   folders: Folder[];
-  activeFolder: string | null;
-  setActiveFolder: React.Dispatch<React.SetStateAction<string | null>>;
-  folderName: string | undefined;
-  setActiveFolderName: React.Dispatch<React.SetStateAction<string | undefined>>;
+  activeFolder: Folder | null;
   fetchFolders: () => void;
   isLoading: boolean;
 }

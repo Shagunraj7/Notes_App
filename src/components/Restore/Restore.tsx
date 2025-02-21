@@ -1,7 +1,7 @@
 import { useNavigate , useParams } from "react-router-dom";
 import restore from "../../assets/restore.svg"
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from 'react-toastify';
 
 const AxiosApi = axios.create({ baseURL:'https://nowted-server.remotestate.com' });
@@ -10,13 +10,18 @@ function Restore() {
   const {noteId} = useParams();
   const navigate = useNavigate();
   const [noteName , setNoteName] = useState<string>("");
-  function restoreNote() {
+  const restoreNote = useCallback(() => {
     AxiosApi.post(`/notes/${noteId}/restore`);
     toast.success('Note Restored');
     navigate("/trash");
-  }
+  },[navigate, noteId]);
+  
   useEffect(() => {
-    AxiosApi.get(`/notes/${noteId}`).then(res => setNoteName(res.data.note.title))
+    async function fetchNote() {
+      const res = await AxiosApi.get(`/notes/${noteId}`);
+      setNoteName(res.data.note.title);
+    }
+    fetchNote();
   },[noteId]);
   return (
     <>
