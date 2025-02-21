@@ -123,7 +123,7 @@ function Sidebar() {
                 }}
               >
                 <img src={archive} alt="" />
-                Archived Notes
+                Changed
               </NavLink>
             </ul>
           </div>
